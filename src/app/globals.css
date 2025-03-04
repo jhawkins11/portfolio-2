@@ -1,0 +1,234 @@
+@import 'tailwindcss';
+@config '../../tailwind.config.ts';
+
+@layer base {
+  :root {
+    --background: hsl(210, 30%, 98%);
+    --foreground: hsl(222.2 84% 4.9%);
+    --primary: hsl(214.3 100% 45%);
+    --primary-rgb: 41, 98, 255;
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(47, 95%, 57%);
+    --secondary-rgb: 250, 204, 21;
+    --secondary-foreground: hsl(0 0% 0%);
+    --accent: hsl(328, 85%, 64%);
+    --accent-rgb: 236, 72, 153;
+    --accent-foreground: hsl(0 0% 100%);
+    --muted: hsl(210 40% 96.1%);
+    --muted-foreground: hsl(215.4 16.3% 46.9%);
+    --success: hsl(142.1 76.2% 36.3%);
+    --error: hsl(346 84% 46%);
+    --border: hsla(214.3 31.8% 91.4% / 0.4);
+    --input: hsl(214.3 31.8% 91.4%);
+    --ring: hsl(214.3 100% 41.4%);
+    --radius: 0.75rem;
+    --neutral: hsl(220 13% 28%);
+    --base-100: hsl(0 0% 100%);
+  }
+
+  .dark {
+    --background: hsl(222.2 84% 4.9%);
+    --foreground: hsl(210 40% 98%);
+    --primary: hsl(214.3 100% 60%);
+    --primary-rgb: 59, 130, 246;
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(47, 95%, 57%);
+    --secondary-rgb: 250, 204, 21;
+    --secondary-foreground: hsl(0 0% 0%);
+    --accent: hsl(328, 85%, 64%);
+    --accent-rgb: 236, 72, 153;
+    --accent-foreground: hsl(0 0% 100%);
+    --muted: hsl(217.2 32.6% 17.5%);
+    --muted-foreground: hsl(215 20.2% 65.1%);
+    --success: hsl(142.1 70.6% 45.3%);
+    --error: hsl(346 84% 56%);
+    --border: hsla(217.2 32.6% 17.5% / 0.4);
+    --input: hsl(217.2 32.6% 17.5%);
+    --ring: hsl(214.3 100% 50%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+}
+
+@layer components {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary animate-gradient-x;
+  }
+
+  .text-gradient-blue {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-violet-600 animate-gradient-x;
+  }
+
+  .hero-section {
+    background-image: radial-gradient(
+        circle at 80% 20%,
+        hsla(214.3, 100%, 60%, 0.15) 0,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 20% 80%,
+        hsla(328, 85%, 64%, 0.1) 0,
+        transparent 35%
+      ),
+      linear-gradient(to right, var(--background), var(--background));
+    background-size: 100% 100%, 100% 100%, 100% 100%;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-2 relative before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r before:from-primary/20 before:to-accent/20 before:opacity-0 before:transition-opacity hover:before:opacity-100 before:-z-10;
+  }
+
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+
+  .animated-border {
+    @apply relative before:absolute before:inset-0 before:rounded-lg before:p-[2px] before:bg-gradient-to-r before:from-primary before:via-accent before:to-secondary before:animate-spin-slow before:-z-10;
+  }
+
+  .button-primary {
+    @apply relative bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-md overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg;
+  }
+
+  .button-primary::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-primary via-accent to-secondary opacity-0 transition-opacity duration-300;
+  }
+
+  .button-primary:hover::after {
+    @apply opacity-20;
+  }
+
+  .button-secondary {
+    @apply relative bg-background text-foreground border border-white/10 px-6 py-3 rounded-md overflow-hidden shadow-md backdrop-blur-sm transition-all duration-300 hover:bg-white/5 hover:shadow-lg;
+  }
+
+  .blob {
+    @apply absolute opacity-40 mix-blend-multiply filter blur-3xl;
+    animation: blob 20s infinite;
+  }
+
+  .parallax-section {
+    @apply relative overflow-hidden;
+  }
+
+  .moving-grid {
+    @apply absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-10;
+  }
+
+  .moving-grid > div {
+    @apply border border-primary/10;
+  }
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shine {
+  to {
+    right: -200%;
+  }
+}
+
+@layer utilities {
+  .animate-blob {
+    animation: blob 20s infinite alternate;
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 12s linear infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  .animate-shine {
+    animation: shine 1.2s forwards linear;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Add custom scrollbar for code blocks */
+pre::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+pre::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--primary-rgb), 0.2);
+  border-radius: 20px;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--primary-rgb), 0.3);
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+/* Enhance 3D scene */
+canvas {
+  outline: none !important;
+  touch-action: none;
+}
+
+/* Improve glass effects */
+.glass-effect {
+  @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl;
+}
