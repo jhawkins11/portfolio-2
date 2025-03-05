@@ -6,7 +6,6 @@ import {
   FiSliders,
   FiCode,
   FiX,
-  FiSettings,
   FiRotateCcw,
   FiLayers,
   FiDroplet,
@@ -89,15 +88,21 @@ export default function PlaygroundControls({
   useEffect(() => {
     console.log('PlaygroundControls: isVisible prop changed to', isVisible)
     setVisible(isVisible)
-  }, [isVisible])
 
-  // Notify parent of visibility changes
-  useEffect(() => {
-    console.log('PlaygroundControls: visible state changed to', visible)
-    if (onVisibilityChange && visible !== isVisible) {
-      onVisibilityChange(visible)
+    // When the panel becomes visible again, sync settings with latest from parent
+    if (isVisible) {
+      setSettings(initialSettings)
     }
-  }, [visible, onVisibilityChange, isVisible])
+  }, [isVisible, initialSettings])
+
+  // Notify parent of visibility changes, but only when closing through UI
+  // This prevents an infinite loop from the two-way binding
+  const handleClose = () => {
+    setVisible(false)
+    if (onVisibilityChange) {
+      onVisibilityChange(false)
+    }
+  }
 
   // Update parent component when settings change
   const handleSettingChange = (
@@ -117,8 +122,10 @@ export default function PlaygroundControls({
   }
 
   const resetSettings = () => {
-    setSettings(initialSettings)
-    onSettingsChange(initialSettings)
+    // Use a fresh copy of the initial settings
+    const resetValues = JSON.parse(JSON.stringify(initialSettings))
+    setSettings(resetValues)
+    onSettingsChange(resetValues)
   }
 
   const formatSettingsCode = () => {
@@ -142,6 +149,7 @@ export default function PlaygroundControls({
           input:
             'bg-gray-50 border border-gray-200 text-gray-800 focus:border-blue-500',
           codeBlock: 'bg-gray-100 text-gray-800',
+          closeButton: 'bg-red-500 hover:bg-red-600 text-white',
         }
       : {
           panel:
@@ -159,248 +167,352 @@ export default function PlaygroundControls({
           input:
             'bg-neutral-800 border border-neutral-700 text-neutral-200 focus:border-blue-500',
           codeBlock: 'bg-neutral-800 text-neutral-300',
+          closeButton: 'bg-red-500 hover:bg-red-600 text-white',
         }
   }
 
   const theme = getThemeClasses()
 
   return (
-    <div className='fixed bottom-8 right-8 z-50 flex flex-col items-end'>
-      {/* Main controls */}
-      <motion.div
-        className={`${theme.panel} overflow-hidden ${
-          visible ? 'w-80' : 'w-0 h-0 overflow-hidden'
-        }`}
-        initial={{ width: 0, height: 0, opacity: 0 }}
-        animate={{
-          width: visible ? 320 : 0,
-          height: visible ? 'auto' : 0,
-          opacity: visible ? 1 : 0,
-        }}
-        transition={{
-          duration: 0.3,
-          ease: 'easeInOut',
-        }}
-      >
-        <div className='p-4'>
-          <div className='flex justify-between items-center mb-4'>
-            <h3 className={`text-lg font-bold ${theme.title}`}>
-              <span className={theme.highlight}>Live</span> React Playground
-            </h3>
-            <div className='flex space-x-2'>
-              <button
-                onClick={() => setShowingCode(!showingCode)}
-                className={`p-2 rounded ${
-                  showingCode ? theme.button.primary : theme.button.secondary
-                }`}
-                title='Show Code'
-              >
-                <FiCode size={16} />
-              </button>
-              <button
-                onClick={resetSettings}
-                className={`p-2 rounded ${theme.button.secondary}`}
-                title='Reset Settings'
-              >
-                <FiRotateCcw size={16} />
-              </button>
-              <button
-                onClick={() => setVisible(false)}
-                className={`p-2 rounded ${theme.button.secondary}`}
-                title='Close Panel'
-              >
-                <FiX size={16} />
-              </button>
-            </div>
-          </div>
-
-          {/* Show code preview or tabs */}
-          {showingCode ? (
-            <div
-              className={`${theme.codeBlock} p-3 rounded overflow-auto text-xs font-mono max-h-72`}
-            >
-              <pre>{formatSettingsCode()}</pre>
-            </div>
-          ) : (
-            <>
-              {/* Tabs */}
-              <div className={`flex ${theme.tabs} mb-4`}>
+    <motion.div
+      className={`fixed bottom-6 right-6 z-50 ${theme.panel}`}
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={
+        visible
+          ? { opacity: 1, scale: 1, y: 0 }
+          : { opacity: 0, scale: 0.9, y: 20 }
+      }
+      transition={{ duration: 0.3 }}
+    >
+      {visible && (
+        <div className='relative'>
+          {/* Close button */}
+          <motion.button
+            className={`absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center ${theme.closeButton}`}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleClose}
+          >
+            <FiX />
+          </motion.button>
+          <div className='p-4'>
+            <div className='flex justify-between items-center mb-4'>
+              <h3 className={`text-lg font-bold ${theme.title}`}>
+                <span className={theme.highlight}>Live</span> React Playground
+              </h3>
+              <div className='flex space-x-2'>
                 <button
-                  onClick={() => setActiveTab('sphere')}
-                  className={`flex items-center p-2 ${
-                    activeTab === 'sphere' ? theme.activeTab : theme.inactiveTab
+                  onClick={() => setShowingCode(!showingCode)}
+                  className={`p-2 rounded ${
+                    showingCode ? theme.button.primary : theme.button.secondary
                   }`}
+                  title='Show Code'
                 >
-                  <FiSliders className='mr-2' size={16} />
-                  <span>Sphere</span>
+                  <FiCode size={16} />
                 </button>
                 <button
-                  onClick={() => setActiveTab('floatingObjects')}
-                  className={`flex items-center p-2 ${
-                    activeTab === 'floatingObjects'
-                      ? theme.activeTab
-                      : theme.inactiveTab
-                  }`}
+                  onClick={resetSettings}
+                  className={`p-2 rounded ${theme.button.secondary}`}
+                  title='Reset Settings'
                 >
-                  <FiLayers className='mr-2' size={16} />
-                  <span>Objects</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('background')}
-                  className={`flex items-center p-2 ${
-                    activeTab === 'background'
-                      ? theme.activeTab
-                      : theme.inactiveTab
-                  }`}
-                >
-                  <FiDroplet className='mr-2' size={16} />
-                  <span>Bg</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('animation')}
-                  className={`flex items-center p-2 ${
-                    activeTab === 'animation'
-                      ? theme.activeTab
-                      : theme.inactiveTab
-                  }`}
-                >
-                  <FiZap className='mr-2' size={16} />
-                  <span>Anim</span>
+                  <FiRotateCcw size={16} />
                 </button>
               </div>
+            </div>
 
-              {/* Tab content */}
-              <div className='space-y-4'>
-                {/* Sphere Settings */}
-                {activeTab === 'sphere' && (
-                  <>
-                    <div className='space-y-3'>
-                      <div>
-                        <label
-                          className={`block mb-1 text-sm font-medium ${theme.title}`}
-                        >
-                          Sphere Color
-                        </label>
-                        <div className='flex items-center gap-2'>
-                          <div
-                            className='w-8 h-8 rounded cursor-pointer border border-white/20'
-                            style={{ backgroundColor: settings.sphere.color }}
-                            onClick={() =>
-                              setColorPickerOpen(
-                                colorPickerOpen === 'sphereColor'
-                                  ? null
-                                  : 'sphereColor'
-                              )
-                            }
-                          />
+            {/* Show code preview or tabs */}
+            {showingCode ? (
+              <div
+                className={`${theme.codeBlock} p-3 rounded overflow-auto text-xs font-mono max-h-72`}
+              >
+                <pre>{formatSettingsCode()}</pre>
+              </div>
+            ) : (
+              <>
+                {/* Tabs */}
+                <div className={`flex ${theme.tabs} mb-4`}>
+                  <button
+                    onClick={() => setActiveTab('sphere')}
+                    className={`flex items-center p-2 ${
+                      activeTab === 'sphere'
+                        ? theme.activeTab
+                        : theme.inactiveTab
+                    }`}
+                  >
+                    <FiSliders className='mr-2' size={16} />
+                    <span>Sphere</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('floatingObjects')}
+                    className={`flex items-center p-2 ${
+                      activeTab === 'floatingObjects'
+                        ? theme.activeTab
+                        : theme.inactiveTab
+                    }`}
+                  >
+                    <FiLayers className='mr-2' size={16} />
+                    <span>Objects</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('background')}
+                    className={`flex items-center p-2 ${
+                      activeTab === 'background'
+                        ? theme.activeTab
+                        : theme.inactiveTab
+                    }`}
+                  >
+                    <FiDroplet className='mr-2' size={16} />
+                    <span>Bg</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('animation')}
+                    className={`flex items-center p-2 ${
+                      activeTab === 'animation'
+                        ? theme.activeTab
+                        : theme.inactiveTab
+                    }`}
+                  >
+                    <FiZap className='mr-2' size={16} />
+                    <span>Anim</span>
+                  </button>
+                </div>
+
+                {/* Tab content */}
+                <div className='space-y-4'>
+                  {/* Sphere Settings */}
+                  {activeTab === 'sphere' && (
+                    <>
+                      <div className='space-y-3'>
+                        <div>
+                          <label
+                            className={`block mb-1 text-sm font-medium ${theme.title}`}
+                          >
+                            Sphere Color
+                          </label>
+                          <div className='flex items-center gap-2'>
+                            <div
+                              className='w-8 h-8 rounded cursor-pointer border border-white/20'
+                              style={{ backgroundColor: settings.sphere.color }}
+                              onClick={() =>
+                                setColorPickerOpen(
+                                  colorPickerOpen === 'sphereColor'
+                                    ? null
+                                    : 'sphereColor'
+                                )
+                              }
+                            />
+                            <input
+                              type='text'
+                              value={settings.sphere.color}
+                              onChange={(e) =>
+                                handleSettingChange(
+                                  'sphere',
+                                  'color',
+                                  e.target.value
+                                )
+                              }
+                              className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
+                            />
+                          </div>
+                          {colorPickerOpen === 'sphereColor' && (
+                            <div className='mt-2 p-2 rounded bg-white shadow-lg'>
+                              <HexColorPicker
+                                color={settings.sphere.color}
+                                onChange={(color) =>
+                                  handleSettingChange('sphere', 'color', color)
+                                }
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label
+                            className={`block mb-1 text-sm font-medium ${theme.title}`}
+                          >
+                            Emissive Color
+                          </label>
+                          <div className='flex items-center gap-2'>
+                            <div
+                              className='w-8 h-8 rounded cursor-pointer border border-white/20'
+                              style={{
+                                backgroundColor: settings.sphere.emissive,
+                              }}
+                              onClick={() =>
+                                setColorPickerOpen(
+                                  colorPickerOpen === 'emissive'
+                                    ? null
+                                    : 'emissive'
+                                )
+                              }
+                            />
+                            <input
+                              type='text'
+                              value={settings.sphere.emissive}
+                              onChange={(e) =>
+                                handleSettingChange(
+                                  'sphere',
+                                  'emissive',
+                                  e.target.value
+                                )
+                              }
+                              className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
+                            />
+                          </div>
+                          {colorPickerOpen === 'emissive' && (
+                            <div className='mt-2 p-2 rounded bg-white shadow-lg'>
+                              <HexColorPicker
+                                color={settings.sphere.emissive}
+                                onChange={(color) =>
+                                  handleSettingChange(
+                                    'sphere',
+                                    'emissive',
+                                    color
+                                  )
+                                }
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label
+                            className={`block mb-1 text-sm font-medium ${theme.title}`}
+                          >
+                            Distortion: {settings.sphere.distort.toFixed(2)}
+                          </label>
                           <input
-                            type='text'
-                            value={settings.sphere.color}
+                            type='range'
+                            min='0'
+                            max='1'
+                            step='0.01'
+                            value={settings.sphere.distort}
                             onChange={(e) =>
                               handleSettingChange(
                                 'sphere',
-                                'color',
-                                e.target.value
+                                'distort',
+                                parseFloat(e.target.value)
                               )
                             }
-                            className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
+                            className='w-full'
                           />
                         </div>
-                        {colorPickerOpen === 'sphereColor' && (
-                          <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                            <HexColorPicker
-                              color={settings.sphere.color}
-                              onChange={(color) =>
-                                handleSettingChange('sphere', 'color', color)
-                              }
-                            />
-                          </div>
-                        )}
-                      </div>
 
-                      <div>
-                        <label
-                          className={`block mb-1 text-sm font-medium ${theme.title}`}
-                        >
-                          Emissive Color
-                        </label>
-                        <div className='flex items-center gap-2'>
-                          <div
-                            className='w-8 h-8 rounded cursor-pointer border border-white/20'
-                            style={{
-                              backgroundColor: settings.sphere.emissive,
-                            }}
-                            onClick={() =>
-                              setColorPickerOpen(
-                                colorPickerOpen === 'emissive'
-                                  ? null
-                                  : 'emissive'
-                              )
-                            }
-                          />
+                        <div>
+                          <label
+                            className={`block mb-1 text-sm font-medium ${theme.title}`}
+                          >
+                            Speed: {settings.sphere.speed.toFixed(2)}
+                          </label>
                           <input
-                            type='text'
-                            value={settings.sphere.emissive}
+                            type='range'
+                            min='0'
+                            max='3'
+                            step='0.1'
+                            value={settings.sphere.speed}
                             onChange={(e) =>
                               handleSettingChange(
                                 'sphere',
-                                'emissive',
-                                e.target.value
+                                'speed',
+                                parseFloat(e.target.value)
                               )
                             }
-                            className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
+                            className='w-full'
                           />
                         </div>
-                        {colorPickerOpen === 'emissive' && (
-                          <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                            <HexColorPicker
-                              color={settings.sphere.emissive}
-                              onChange={(color) =>
-                                handleSettingChange('sphere', 'emissive', color)
+
+                        <div className='grid grid-cols-2 gap-4'>
+                          <div>
+                            <label
+                              className={`block mb-1 text-sm font-medium ${theme.title}`}
+                            >
+                              Roughness: {settings.sphere.roughness.toFixed(2)}
+                            </label>
+                            <input
+                              type='range'
+                              min='0'
+                              max='1'
+                              step='0.01'
+                              value={settings.sphere.roughness}
+                              onChange={(e) =>
+                                handleSettingChange(
+                                  'sphere',
+                                  'roughness',
+                                  parseFloat(e.target.value)
+                                )
                               }
+                              className='w-full'
                             />
                           </div>
-                        )}
+                          <div>
+                            <label
+                              className={`block mb-1 text-sm font-medium ${theme.title}`}
+                            >
+                              Metalness: {settings.sphere.metalness.toFixed(2)}
+                            </label>
+                            <input
+                              type='range'
+                              min='0'
+                              max='1'
+                              step='0.01'
+                              value={settings.sphere.metalness}
+                              onChange={(e) =>
+                                handleSettingChange(
+                                  'sphere',
+                                  'metalness',
+                                  parseFloat(e.target.value)
+                                )
+                              }
+                              className='w-full'
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Floating Objects Settings */}
+                  {activeTab === 'floatingObjects' && (
+                    <>
+                      <div className='flex items-center justify-between'>
+                        <label
+                          className={`block text-sm font-medium ${theme.title}`}
+                        >
+                          Show Floating Objects
+                        </label>
+                        <label className='relative inline-flex items-center cursor-pointer'>
+                          <input
+                            type='checkbox'
+                            checked={settings.floatingObjects.visible}
+                            onChange={(e) =>
+                              handleSettingChange(
+                                'floatingObjects',
+                                'visible',
+                                e.target.checked
+                              )
+                            }
+                            className='sr-only peer'
+                          />
+                          <div className="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                        </label>
                       </div>
 
                       <div>
                         <label
                           className={`block mb-1 text-sm font-medium ${theme.title}`}
                         >
-                          Distortion: {settings.sphere.distort.toFixed(2)}
+                          Floating Speed:{' '}
+                          {settings.floatingObjects.speed.toFixed(2)}
                         </label>
                         <input
                           type='range'
-                          min='0'
-                          max='1'
-                          step='0.01'
-                          value={settings.sphere.distort}
-                          onChange={(e) =>
-                            handleSettingChange(
-                              'sphere',
-                              'distort',
-                              parseFloat(e.target.value)
-                            )
-                          }
-                          className='w-full'
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          className={`block mb-1 text-sm font-medium ${theme.title}`}
-                        >
-                          Speed: {settings.sphere.speed.toFixed(2)}
-                        </label>
-                        <input
-                          type='range'
-                          min='0'
+                          min='0.1'
                           max='3'
                           step='0.1'
-                          value={settings.sphere.speed}
+                          value={settings.floatingObjects.speed}
                           onChange={(e) =>
                             handleSettingChange(
-                              'sphere',
+                              'floatingObjects',
                               'speed',
                               parseFloat(e.target.value)
                             )
@@ -408,309 +520,196 @@ export default function PlaygroundControls({
                           className='w-full'
                         />
                       </div>
+                    </>
+                  )}
 
-                      <div className='grid grid-cols-2 gap-4'>
-                        <div>
-                          <label
-                            className={`block mb-1 text-sm font-medium ${theme.title}`}
-                          >
-                            Roughness: {settings.sphere.roughness.toFixed(2)}
-                          </label>
-                          <input
-                            type='range'
-                            min='0'
-                            max='1'
-                            step='0.01'
-                            value={settings.sphere.roughness}
-                            onChange={(e) =>
-                              handleSettingChange(
-                                'sphere',
-                                'roughness',
-                                parseFloat(e.target.value)
+                  {/* Background Settings */}
+                  {activeTab === 'background' && (
+                    <>
+                      <div>
+                        <label
+                          className={`block mb-1 text-sm font-medium ${theme.title}`}
+                        >
+                          Primary Blob
+                        </label>
+                        <div className='flex items-center gap-2'>
+                          <div
+                            className='w-8 h-8 rounded cursor-pointer border border-white/20'
+                            style={{
+                              backgroundColor: settings.background.primaryBlob,
+                            }}
+                            onClick={() =>
+                              setColorPickerOpen(
+                                colorPickerOpen === 'primaryBlob'
+                                  ? null
+                                  : 'primaryBlob'
                               )
                             }
-                            className='w-full'
                           />
-                        </div>
-                        <div>
-                          <label
-                            className={`block mb-1 text-sm font-medium ${theme.title}`}
-                          >
-                            Metalness: {settings.sphere.metalness.toFixed(2)}
-                          </label>
                           <input
-                            type='range'
-                            min='0'
-                            max='1'
-                            step='0.01'
-                            value={settings.sphere.metalness}
+                            type='text'
+                            value={settings.background.primaryBlob}
                             onChange={(e) =>
-                              handleSettingChange(
-                                'sphere',
-                                'metalness',
-                                parseFloat(e.target.value)
-                              )
-                            }
-                            className='w-full'
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Floating Objects Settings */}
-                {activeTab === 'floatingObjects' && (
-                  <>
-                    <div className='flex items-center justify-between'>
-                      <label
-                        className={`block text-sm font-medium ${theme.title}`}
-                      >
-                        Show Floating Objects
-                      </label>
-                      <label className='relative inline-flex items-center cursor-pointer'>
-                        <input
-                          type='checkbox'
-                          checked={settings.floatingObjects.visible}
-                          onChange={(e) =>
-                            handleSettingChange(
-                              'floatingObjects',
-                              'visible',
-                              e.target.checked
-                            )
-                          }
-                          className='sr-only peer'
-                        />
-                        <div className="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                      </label>
-                    </div>
-
-                    <div>
-                      <label
-                        className={`block mb-1 text-sm font-medium ${theme.title}`}
-                      >
-                        Floating Speed:{' '}
-                        {settings.floatingObjects.speed.toFixed(2)}
-                      </label>
-                      <input
-                        type='range'
-                        min='0.1'
-                        max='3'
-                        step='0.1'
-                        value={settings.floatingObjects.speed}
-                        onChange={(e) =>
-                          handleSettingChange(
-                            'floatingObjects',
-                            'speed',
-                            parseFloat(e.target.value)
-                          )
-                        }
-                        className='w-full'
-                      />
-                    </div>
-                  </>
-                )}
-
-                {/* Background Settings */}
-                {activeTab === 'background' && (
-                  <>
-                    <div>
-                      <label
-                        className={`block mb-1 text-sm font-medium ${theme.title}`}
-                      >
-                        Primary Blob
-                      </label>
-                      <div className='flex items-center gap-2'>
-                        <div
-                          className='w-8 h-8 rounded cursor-pointer border border-white/20'
-                          style={{
-                            backgroundColor: settings.background.primaryBlob,
-                          }}
-                          onClick={() =>
-                            setColorPickerOpen(
-                              colorPickerOpen === 'primaryBlob'
-                                ? null
-                                : 'primaryBlob'
-                            )
-                          }
-                        />
-                        <input
-                          type='text'
-                          value={settings.background.primaryBlob}
-                          onChange={(e) =>
-                            handleSettingChange(
-                              'background',
-                              'primaryBlob',
-                              e.target.value
-                            )
-                          }
-                          className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
-                        />
-                      </div>
-                      {colorPickerOpen === 'primaryBlob' && (
-                        <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                          <HexColorPicker
-                            color={settings.background.primaryBlob}
-                            onChange={(color) =>
                               handleSettingChange(
                                 'background',
                                 'primaryBlob',
-                                color
+                                e.target.value
+                              )
+                            }
+                            className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
+                          />
+                        </div>
+                        {colorPickerOpen === 'primaryBlob' && (
+                          <div className='mt-2 p-2 rounded bg-white shadow-lg'>
+                            <HexColorPicker
+                              color={settings.background.primaryBlob}
+                              onChange={(color) =>
+                                handleSettingChange(
+                                  'background',
+                                  'primaryBlob',
+                                  color
+                                )
+                              }
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label
+                          className={`block mb-1 text-sm font-medium ${theme.title}`}
+                        >
+                          Secondary Blob
+                        </label>
+                        <div className='flex items-center gap-2'>
+                          <div
+                            className='w-8 h-8 rounded cursor-pointer border border-white/20'
+                            style={{
+                              backgroundColor:
+                                settings.background.secondaryBlob,
+                            }}
+                            onClick={() =>
+                              setColorPickerOpen(
+                                colorPickerOpen === 'secondaryBlob'
+                                  ? null
+                                  : 'secondaryBlob'
                               )
                             }
                           />
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label
-                        className={`block mb-1 text-sm font-medium ${theme.title}`}
-                      >
-                        Secondary Blob
-                      </label>
-                      <div className='flex items-center gap-2'>
-                        <div
-                          className='w-8 h-8 rounded cursor-pointer border border-white/20'
-                          style={{
-                            backgroundColor: settings.background.secondaryBlob,
-                          }}
-                          onClick={() =>
-                            setColorPickerOpen(
-                              colorPickerOpen === 'secondaryBlob'
-                                ? null
-                                : 'secondaryBlob'
-                            )
-                          }
-                        />
-                        <input
-                          type='text'
-                          value={settings.background.secondaryBlob}
-                          onChange={(e) =>
-                            handleSettingChange(
-                              'background',
-                              'secondaryBlob',
-                              e.target.value
-                            )
-                          }
-                          className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
-                        />
-                      </div>
-                      {colorPickerOpen === 'secondaryBlob' && (
-                        <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                          <HexColorPicker
-                            color={settings.background.secondaryBlob}
-                            onChange={(color) =>
+                          <input
+                            type='text'
+                            value={settings.background.secondaryBlob}
+                            onChange={(e) =>
                               handleSettingChange(
                                 'background',
                                 'secondaryBlob',
-                                color
+                                e.target.value
+                              )
+                            }
+                            className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
+                          />
+                        </div>
+                        {colorPickerOpen === 'secondaryBlob' && (
+                          <div className='mt-2 p-2 rounded bg-white shadow-lg'>
+                            <HexColorPicker
+                              color={settings.background.secondaryBlob}
+                              onChange={(color) =>
+                                handleSettingChange(
+                                  'background',
+                                  'secondaryBlob',
+                                  color
+                                )
+                              }
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label
+                          className={`block mb-1 text-sm font-medium ${theme.title}`}
+                        >
+                          Accent Blob
+                        </label>
+                        <div className='flex items-center gap-2'>
+                          <div
+                            className='w-8 h-8 rounded cursor-pointer border border-white/20'
+                            style={{
+                              backgroundColor: settings.background.accentBlob,
+                            }}
+                            onClick={() =>
+                              setColorPickerOpen(
+                                colorPickerOpen === 'accentBlob'
+                                  ? null
+                                  : 'accentBlob'
                               )
                             }
                           />
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label
-                        className={`block mb-1 text-sm font-medium ${theme.title}`}
-                      >
-                        Accent Blob
-                      </label>
-                      <div className='flex items-center gap-2'>
-                        <div
-                          className='w-8 h-8 rounded cursor-pointer border border-white/20'
-                          style={{
-                            backgroundColor: settings.background.accentBlob,
-                          }}
-                          onClick={() =>
-                            setColorPickerOpen(
-                              colorPickerOpen === 'accentBlob'
-                                ? null
-                                : 'accentBlob'
-                            )
-                          }
-                        />
-                        <input
-                          type='text'
-                          value={settings.background.accentBlob}
-                          onChange={(e) =>
-                            handleSettingChange(
-                              'background',
-                              'accentBlob',
-                              e.target.value
-                            )
-                          }
-                          className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
-                        />
-                      </div>
-                      {colorPickerOpen === 'accentBlob' && (
-                        <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                          <HexColorPicker
-                            color={settings.background.accentBlob}
-                            onChange={(color) =>
+                          <input
+                            type='text'
+                            value={settings.background.accentBlob}
+                            onChange={(e) =>
                               handleSettingChange(
                                 'background',
                                 'accentBlob',
-                                color
+                                e.target.value
                               )
                             }
+                            className={`${theme.input} text-sm px-2 py-1 rounded w-full`}
                           />
                         </div>
-                      )}
-                    </div>
-                  </>
-                )}
+                        {colorPickerOpen === 'accentBlob' && (
+                          <div className='mt-2 p-2 rounded bg-white shadow-lg'>
+                            <HexColorPicker
+                              color={settings.background.accentBlob}
+                              onChange={(color) =>
+                                handleSettingChange(
+                                  'background',
+                                  'accentBlob',
+                                  color
+                                )
+                              }
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
 
-                {/* Animation Settings */}
-                {activeTab === 'animation' && (
-                  <>
-                    <div>
-                      <label
-                        className={`block mb-1 text-sm font-medium ${theme.title}`}
-                      >
-                        Global Animation Speed:{' '}
-                        {settings.animation.speed.toFixed(2)}
-                      </label>
-                      <input
-                        type='range'
-                        min='0.1'
-                        max='3'
-                        step='0.1'
-                        value={settings.animation.speed}
-                        onChange={(e) =>
-                          handleSettingChange(
-                            'animation',
-                            'speed',
-                            parseFloat(e.target.value)
-                          )
-                        }
-                        className='w-full'
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-            </>
-          )}
+                  {/* Animation Settings */}
+                  {activeTab === 'animation' && (
+                    <>
+                      <div>
+                        <label
+                          className={`block mb-1 text-sm font-medium ${theme.title}`}
+                        >
+                          Global Animation Speed:{' '}
+                          {settings.animation.speed.toFixed(2)}
+                        </label>
+                        <input
+                          type='range'
+                          min='0.1'
+                          max='3'
+                          step='0.1'
+                          value={settings.animation.speed}
+                          onChange={(e) =>
+                            handleSettingChange(
+                              'animation',
+                              'speed',
+                              parseFloat(e.target.value)
+                            )
+                          }
+                          className='w-full'
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
-      </motion.div>
-
-      {/* Toggle button - only shown if not controlled by parent */}
-      {!onVisibilityChange && (
-        <motion.button
-          onClick={() => setVisible(!visible)}
-          className='flex items-center justify-center w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transform transition-transform duration-200 hover:scale-110'
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          animate={{
-            rotate: visible ? 180 : 0,
-          }}
-        >
-          <FiSettings size={20} />
-        </motion.button>
       )}
-    </div>
+    </motion.div>
   )
 }

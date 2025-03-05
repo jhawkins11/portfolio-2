@@ -146,29 +146,33 @@ const FloatingObjects = ({
 export default function HeroSection() {
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Add a default settings constant to reset to if needed
+  const defaultPlaygroundSettings: PlaygroundSettings = {
+    sphere: {
+      color: '#3490dc',
+      emissive: '#094c8d',
+      distort: 0.3,
+      speed: 1.5,
+      roughness: 0.15,
+      metalness: 0.9,
+    },
+    floatingObjects: {
+      visible: true,
+      speed: 1.0,
+    },
+    background: {
+      primaryBlob: '#ffb7b7',
+      secondaryBlob: '#b7e4e0',
+      accentBlob: '#ffe2b7',
+    },
+    animation: {
+      speed: 1.0,
+    },
+  }
+
   const [playgroundSettings, setPlaygroundSettings] =
-    useState<PlaygroundSettings>({
-      sphere: {
-        color: '#3490dc',
-        emissive: '#094c8d',
-        distort: 0.3,
-        speed: 1.5,
-        roughness: 0.15,
-        metalness: 0.9,
-      },
-      floatingObjects: {
-        visible: true,
-        speed: 1.0,
-      },
-      background: {
-        primaryBlob: '#ffb7b7',
-        secondaryBlob: '#b7e4e0',
-        accentBlob: '#ffe2b7',
-      },
-      animation: {
-        speed: 1.0,
-      },
-    })
+    useState<PlaygroundSettings>(defaultPlaygroundSettings)
 
   // Replace the tutorial state with playground mode state
   const [playgroundMode, setPlaygroundMode] = useState(false)
@@ -178,6 +182,8 @@ export default function HeroSection() {
   )
   const [hasSeenAnimation, setHasSeenAnimation] = useState(false)
   const [showButtonCTA, setShowButtonCTA] = useState(false)
+  // Track if we need to reset settings on next open
+  const [shouldResetOnNextOpen, setShouldResetOnNextOpen] = useState(false)
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -226,10 +232,23 @@ export default function HeroSection() {
 
   const handlePlaygroundSettingsChange = (newSettings: PlaygroundSettings) => {
     setPlaygroundSettings(newSettings)
+    // When settings are changed, make sure we don't reset on next open
+    setShouldResetOnNextOpen(false)
+  }
+
+  // Reset playground settings to defaults
+  const resetPlaygroundSettings = () => {
+    setPlaygroundSettings({ ...defaultPlaygroundSettings })
   }
 
   // Open controls with default tab
   const openControls = (tab: string | null = null) => {
+    // Check if we need to reset settings
+    if (shouldResetOnNextOpen) {
+      resetPlaygroundSettings()
+      setShouldResetOnNextOpen(false)
+    }
+
     if (tab) {
       setActiveControlPoint(tab)
     } else {
@@ -248,6 +267,12 @@ export default function HeroSection() {
 
     // Reset button CTA to avoid multiple buttons appearing
     setShowButtonCTA(false)
+  }
+
+  // Handle closing controls
+  const closeControls = () => {
+    setShowControlPanel(false)
+    setActiveControlPoint(null)
   }
 
   const nameVariants = {
@@ -297,6 +322,16 @@ export default function HeroSection() {
 
       {/* Add noise texture for more organic feel */}
       <div className='bg-noise absolute inset-0 pointer-events-none'></div>
+
+      {/* Floating particles for depth - moved down in the DOM for proper z-index layering */}
+      <div className='bg-particles absolute inset-0 z-1000'>
+        <div className='particle'></div>
+        <div className='particle'></div>
+        <div className='particle'></div>
+        <div className='particle'></div>
+        <div className='particle'></div>
+        <div className='particle'></div>
+      </div>
 
       {/* Content Container */}
       <div className='container mx-auto px-4 sm:px-6 lg:px-8 z-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12'>
@@ -716,20 +751,7 @@ function createImpact() {
           onSettingsChange={handlePlaygroundSettingsChange}
           activeControlPoint={activeControlPoint}
           isVisible={showControlPanel}
-          onVisibilityChange={(visible) => {
-            // When the control panel visibility changes internally
-            setShowControlPanel(visible)
-            // Only exit playground mode if explicitly closing
-            if (!visible) {
-              console.log('Controls closed')
-              // Reset state to avoid issues when reopening
-              setTimeout(() => {
-                if (!visible) {
-                  setActiveControlPoint(null)
-                }
-              }, 300)
-            }
-          }}
+          onVisibilityChange={closeControls}
           lightTheme={true}
         />
       )}
