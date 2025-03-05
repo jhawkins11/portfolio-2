@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, createContext, useContext } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Stage } from '@react-three/drei'
 import { motion } from 'framer-motion'
-import { FiPlus } from 'react-icons/fi'
+import { FiPlus, FiTool } from 'react-icons/fi'
 
 import ShapeGenerator from './ShapeGenerator'
 import DrawingCanvasPortal from './DrawingCanvasPortal'
@@ -12,7 +10,7 @@ import DrawingCanvasPortal from './DrawingCanvasPortal'
 // Create a context to share state between components
 const ShapesContext = createContext<{
   shapes: CustomShape[]
-  addShape: (points: Point[]) => void
+  addShape: (shapeData: Point[] | ShapeWithHoles) => void
   clearShapes: () => void
 }>({
   shapes: [],
@@ -25,9 +23,16 @@ type Point = {
   y: number
 }
 
+// Shape with holes support
+type ShapeWithHoles = {
+  outerShape: Point[]
+  holes: Point[][]
+}
+
 type CustomShape = {
   id: string
   points: Point[]
+  holes?: Point[][] // Added support for holes
   color: string
   height: number
   speed: number
@@ -42,6 +47,9 @@ type CustomShapesProps = {
   shapesOnly?: boolean
 }
 
+// Track which positions have been used to avoid duplicates
+let usedPositionIndices: number[] = []
+
 // Generate random color in the blue/purple/pink spectrum
 const getRandomColor = () => {
   const hue = Math.floor(Math.random() * 60) + 210 // 210-270 range (blue to purple)
@@ -51,18 +59,62 @@ const getRandomColor = () => {
   return `hsl(${hue}, ${saturation}%, ${lightness}%)`
 }
 
-// Generate random position with emphasis on outer edges but keep within visible bounds
-const getRandomPosition = (): [number, number, number] => {
-  // Generate a number between 0 and 1
-  const radius = Math.random() * 0.3 + 0.7 // 0.7 to 1.0 (outer area)
-  const angle = Math.random() * Math.PI * 2 // 0 to 2π (full circle)
+// Generate position from predefined good viewable locations
+const getShapePosition = (): [number, number, number] => {
+  // Predefined positions that work well visually (x, y, z)
+  const predefinedPositions: [number, number, number][] = [
+    // Top right quadrant positions
+    [1.5, 1.2, 1.2],
+    [1.2, 1.5, 0.8],
+    [1.6, 0.8, 1.0],
 
-  // Convert to cartesian coordinates (keeping within visible bounds)
-  return [
-    Math.cos(angle) * radius * 1.8, // x: pushes to outer circle with radius 1.8 (was 3)
-    Math.sin(angle) * radius * 1.8, // y: pushes to outer circle with radius 1.8 (was 3)
-    Math.random() * 2 + 0.5, // z: 0.5 to 2.5 (varied depth)
+    // Top left quadrant positions
+    [-1.5, 1.2, 1.2],
+    [-1.2, 1.5, 0.8],
+    [-1.6, 0.8, 1.0],
+
+    // Bottom right quadrant positions
+    [1.5, -1.2, 1.2],
+    [1.2, -1.5, 0.8],
+    [1.6, -0.8, 1.0],
+
+    // Bottom left quadrant positions
+    [-1.5, -1.2, 1.2],
+    [-1.2, -1.5, 0.8],
+    [-1.6, -0.8, 1.0],
+
+    // Additional positions with good visibility
+    [0, 1.7, 1.2], // Top center
+    [0, -1.7, 1.2], // Bottom center
+    [1.7, 0, 1.2], // Right center
+    [-1.7, 0, 1.2], // Left center
   ]
+
+  // Find available positions
+  const availableIndices = Array.from(
+    { length: predefinedPositions.length },
+    (_, i) => i
+  ).filter((index) => !usedPositionIndices.includes(index))
+
+  // If all positions are used, reset the tracking
+  if (availableIndices.length === 0) {
+    usedPositionIndices = []
+    availableIndices.push(
+      ...Array.from({ length: predefinedPositions.length }, (_, i) => i)
+    )
+  }
+
+  // Select a random available position
+  const randomIndex = Math.floor(Math.random() * availableIndices.length)
+  const selectedIndex = availableIndices[randomIndex]
+
+  // Mark this position as used
+  usedPositionIndices.push(selectedIndex)
+
+  console.log(
+    `Using position at index ${selectedIndex}: ${predefinedPositions[selectedIndex]}`
+  )
+  return predefinedPositions[selectedIndex]
 }
 
 // This component ONLY renders Three.js objects (no DOM elements)
@@ -81,6 +133,7 @@ function ShapesRenderer({
         <ShapeGenerator
           key={shape.id}
           points={shape.points}
+          holes={shape.holes}
           color={shape.color}
           height={shape.height}
           speed={shape.speed * speed}
@@ -95,17 +148,47 @@ function ShapesRenderer({
 export function ShapesProvider({ children }: { children: React.ReactNode }) {
   const [shapes, setShapes] = useState<CustomShape[]>([])
 
-  const addShape = (points: Point[]) => {
-    console.log('Adding shape with', points.length, 'points')
-    if (points.length < 3) return
+  const addShape = (shapeData: Point[] | ShapeWithHoles) => {
+    // Check if we received a shape with holes
+    const isShapeWithHoles = (
+      data: Point[] | ShapeWithHoles
+    ): data is ShapeWithHoles =>
+      data &&
+      typeof data === 'object' &&
+      !Array.isArray(data) &&
+      'outerShape' in data &&
+      'holes' in data
+
+    let points: Point[]
+    let holes: Point[][] | undefined
+
+    if (isShapeWithHoles(shapeData)) {
+      console.log('Adding complex shape with', shapeData.holes.length, 'holes')
+      points = shapeData.outerShape
+      holes = shapeData.holes
+
+      if (points.length < 3) {
+        console.warn('Not enough points in outer shape (minimum 3 required)')
+        return
+      }
+    } else {
+      console.log('Adding simple shape with', shapeData.length, 'points')
+      points = shapeData
+
+      if (points.length < 3) {
+        console.warn('Not enough points to create a shape (minimum 3 required)')
+        return
+      }
+    }
 
     const newShape: CustomShape = {
       id: Date.now().toString(),
       points,
+      holes,
       color: getRandomColor(),
       height: Math.random() * 0.2 + 0.2, // 0.2 to 0.4 (more consistent height)
       speed: Math.random() * 0.3 + 0.5, // 0.5 to 0.8 (slower rotation)
-      position: getRandomPosition(),
+      position: getShapePosition(),
     }
 
     console.log('Created new shape:', newShape)
@@ -130,17 +213,42 @@ export function useShapes() {
 }
 
 // UI Controls component
-function ShapesControls() {
+function ShapesControls({
+  onSettingsClick,
+}: {
+  onSettingsClick?: (() => void) | null
+}) {
   const { shapes, addShape, clearShapes } = useShapes()
   const [showDrawingCanvas, setShowDrawingCanvas] = useState(false)
 
-  const handleShapeCreated = (points: Point[]) => {
-    addShape(points)
-    setShowDrawingCanvas(false)
+  const handleShapeCreated = (shapeData: Point[] | ShapeWithHoles) => {
+    console.log('ShapesControls received shape data')
+
+    // Validate shape data
+    const isShapeWithHoles = (data: unknown): data is ShapeWithHoles =>
+      data !== null &&
+      typeof data === 'object' &&
+      !Array.isArray(data) &&
+      'outerShape' in data &&
+      'holes' in data
+
+    if (isShapeWithHoles(shapeData)) {
+      if (shapeData.outerShape.length >= 3) {
+        addShape(shapeData)
+        setShowDrawingCanvas(false)
+      } else {
+        console.error('Invalid shape - not enough points in outer shape')
+      }
+    } else if (Array.isArray(shapeData) && shapeData.length >= 3) {
+      addShape(shapeData)
+      setShowDrawingCanvas(false)
+    } else {
+      console.error('Invalid shape data', shapeData)
+    }
   }
 
   return (
-    <div className='fixed z-[9999]'>
+    <div className='fixed z-[450]'>
       {/* Use Portal for drawing canvas overlay */}
       <DrawingCanvasPortal
         isOpen={showDrawingCanvas}
@@ -149,15 +257,18 @@ function ShapesControls() {
       />
 
       {/* Action buttons */}
-      <div className='fixed bottom-5 right-5 z-[1000] flex flex-col space-y-2'>
+      <div className='fixed bottom-5 right-5 z-[450] flex flex-row space-x-2'>
         {shapes.length > 0 && (
           <motion.button
             onClick={clearShapes}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className='bg-red-500/80 hover:bg-red-600/90 text-white p-2 rounded-full shadow-lg'
+            className='bg-gradient-to-r from-red-500/80 to-orange-600/80 hover:from-red-500/90 hover:to-orange-600/90 text-white px-3 py-2 rounded-full shadow-lg relative overflow-hidden group'
           >
-            Clear All ({shapes.length})
+            <span className='relative z-10 text-sm font-medium'>
+              Clear All ({shapes.length})
+            </span>
+            <div className='absolute -inset-0.5 bg-gradient-to-r from-red-400 to-orange-500 rounded-full blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-200'></div>
           </motion.button>
         )}
 
@@ -165,10 +276,24 @@ function ShapesControls() {
           onClick={() => setShowDrawingCanvas(true)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className='bg-primary/80 hover:bg-primary/90 text-white p-3 rounded-full shadow-lg'
+          className='bg-gradient-to-r from-emerald-500/80 to-teal-600/80 hover:from-emerald-500/90 hover:to-teal-600/90 text-white p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-lg relative overflow-hidden group'
         >
-          <FiPlus className='w-5 h-5' />
+          <FiPlus className='w-5 h-5 relative z-10' />
+          <div className='absolute -inset-0.5 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-200'></div>
         </motion.button>
+
+        {/* Settings button */}
+        {onSettingsClick && (
+          <motion.button
+            onClick={onSettingsClick}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className='bg-gradient-to-r from-purple-500/80 to-pink-600/80 hover:from-purple-500/90 hover:to-pink-600/90 text-white p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-lg relative overflow-hidden group'
+          >
+            <FiTool className='w-5 h-5 relative z-10' />
+            <div className='absolute -inset-0.5 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-200'></div>
+          </motion.button>
+        )}
       </div>
     </div>
   )
@@ -181,50 +306,30 @@ export default function CustomShapes({
   standalone = false,
   uiOnly = false,
   shapesOnly = false,
-}: CustomShapesProps) {
+  onSettingsClick = null,
+}: CustomShapesProps & { onSettingsClick?: (() => void) | null }) {
   if (!enabled) return null
 
-  // If standalone mode, render with own Canvas and context
-  if (standalone) {
-    return (
-      <ShapesProvider>
-        <div className='relative w-full h-full'>
-          {/* 3D Canvas for displaying shapes */}
-          <div className='absolute inset-0 z-0'>
-            <Canvas shadows camera={{ position: [0, 0, 5], fov: 50 }}>
-              <Stage environment='city' intensity={0.5} shadows>
-                <ShapesContent speed={speed} />
-              </Stage>
-              <OrbitControls
-                enableZoom={true}
-                enablePan={true}
-                enableRotate={true}
-                minDistance={3}
-                maxDistance={10}
-              />
-            </Canvas>
-          </div>
-
-          {/* UI Controls - rendered outside Canvas */}
-          <ShapesControls />
-        </div>
-      </ShapesProvider>
-    )
-  }
-
-  // For embedded mode with specific render modes
+  // Only render UI controls if uiOnly or standalone is true
   if (uiOnly) {
-    return <ShapesControls />
+    return <ShapesControls onSettingsClick={onSettingsClick} />
   }
 
+  // Only render shapes if shapesOnly or standalone is true
   if (shapesOnly) {
     return <ShapesContent speed={speed} />
   }
 
-  // This should not happen in embedded mode
-  console.error(
-    'CustomShapes rendered in embedded mode without uiOnly or shapesOnly prop'
-  )
+  // Render both in standalone mode
+  if (standalone) {
+    return (
+      <ShapesProvider>
+        <ShapesContent speed={speed} />
+        <ShapesControls onSettingsClick={onSettingsClick} />
+      </ShapesProvider>
+    )
+  }
+
   return null
 }
 

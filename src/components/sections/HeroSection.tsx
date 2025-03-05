@@ -582,6 +582,7 @@ export default function HeroSection() {
                       playgroundSettings.animation.speed
                     }
                     uiOnly={true}
+                    onSettingsClick={() => openControls()}
                   />
                 </div>
               )}
@@ -694,85 +695,87 @@ function createImpact() {
         </div>
       </motion.div>
 
-      {/* Animated Controls Button with CTA - Premium UX (Repositioned to corner) */}
+      {/* Playground Mode UI - Only show the settings button if CustomShapes is not enabled */}
       <AnimatePresence>
-        {!showControlPanel && (
-          <motion.div
-            className='fixed bottom-8 right-8 z-50 flex items-center'
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.4 }}
-          >
-            {/* Call to action with animated arrow */}
-            <AnimatePresence>
-              {showButtonCTA && (
-                <motion.div
-                  className='absolute right-16 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg flex items-center whitespace-nowrap'
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <span className='text-gray-800 font-medium mr-2'>
-                    Customize Experience
-                  </span>
-                  <motion.div
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 1.5,
-                      ease: 'easeInOut',
-                    }}
-                  >
-                    <FiChevronRight className='text-blue-500' />
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Main control button */}
-            <motion.button
-              onClick={() => {
-                console.log('Button clicked')
-                openControls()
-              }}
-              className='bg-gradient-to-r from-blue-500 to-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg relative overflow-hidden group cursor-pointer'
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+        {!showControlPanel &&
+          playgroundMode &&
+          !playgroundSettings.customShapes.enabled && (
+            <motion.div
+              className='fixed bottom-8 right-8 z-50 flex items-center'
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.4 }}
             >
-              {/* Inner glow effect */}
-              <motion.div
-                className='absolute inset-0 bg-white opacity-0 rounded-full'
-                initial={{ scale: 0.8 }}
-                whileHover={{
-                  scale: 1.2,
-                  opacity: 0.2,
-                  transition: { duration: 0.4 },
+              {/* Call to action with animated arrow */}
+              <AnimatePresence>
+                {showButtonCTA && (
+                  <motion.div
+                    className='absolute right-16 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg flex items-center whitespace-nowrap'
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <span className='text-gray-800 font-medium mr-2'>
+                      Customize Experience
+                    </span>
+                    <motion.div
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 1.5,
+                        ease: 'easeInOut',
+                      }}
+                    >
+                      <FiChevronRight className='text-blue-500' />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Main control button */}
+              <motion.button
+                onClick={() => {
+                  console.log('Button clicked')
+                  openControls()
                 }}
-              />
+                className='bg-gradient-to-r from-blue-500 to-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg relative overflow-hidden group cursor-pointer'
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {/* Inner glow effect */}
+                <motion.div
+                  className='absolute inset-0 bg-white opacity-0 rounded-full'
+                  initial={{ scale: 0.8 }}
+                  whileHover={{
+                    scale: 1.2,
+                    opacity: 0.2,
+                    transition: { duration: 0.4 },
+                  }}
+                />
 
-              {/* Animated ring */}
-              <div className='absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full blur-sm opacity-70 group-hover:opacity-100 transition-opacity duration-200'></div>
+                {/* Animated ring */}
+                <div className='absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full blur-sm opacity-70 group-hover:opacity-100 transition-opacity duration-200'></div>
 
-              {/* Icon */}
-              <FiTool className='text-2xl relative z-10' />
+                {/* Icon */}
+                <FiTool className='text-2xl relative z-10' />
 
-              {/* Subtle particle effect */}
-              <motion.div
-                className='absolute inset-0'
-                animate={{
-                  background: [
-                    'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)',
-                    'radial-gradient(circle at 70% 70%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)',
-                    'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)',
-                  ],
-                }}
-                transition={{ duration: 3, repeat: Infinity }}
-              />
-            </motion.button>
-          </motion.div>
-        )}
+                {/* Subtle particle effect */}
+                <motion.div
+                  className='absolute inset-0'
+                  animate={{
+                    background: [
+                      'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)',
+                      'radial-gradient(circle at 70% 70%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)',
+                      'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)',
+                    ],
+                  }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                />
+              </motion.button>
+            </motion.div>
+          )}
       </AnimatePresence>
 
       {/* Controls Panel - Ensure we're correctly handling the visibility state */}
