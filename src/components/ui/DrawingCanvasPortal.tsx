@@ -1,0 +1,76 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import DrawingCanvas from './DrawingCanvas'
+
+type Point = {
+  x: number
+  y: number
+}
+
+type DrawingCanvasPortalProps = {
+  onShapeCreated: (points: Point[]) => void
+  onClose: () => void
+  isOpen: boolean
+}
+
+const DrawingCanvasPortal = ({
+  onShapeCreated,
+  onClose,
+  isOpen,
+}: DrawingCanvasPortalProps) => {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
+
+  if (!mounted || !isOpen) return null
+
+  // Use createPortal to render outside the normal DOM hierarchy
+  return createPortal(
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 2147483647, // Maximum z-index
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(3px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        pointerEvents: 'auto',
+      }}
+    >
+      <div className='bg-white rounded-lg p-5 shadow-xl max-w-xl w-full mx-4'>
+        <h3 className='text-lg font-bold mb-2 text-center'>Draw Your Shape</h3>
+        <p className='text-sm text-gray-600 mb-4 text-center'>
+          Draw a closed shape that will be converted to 3D
+        </p>
+
+        <DrawingCanvas
+          onShapeCreated={onShapeCreated}
+          width={300}
+          height={300}
+        />
+
+        <div className='mt-3 flex justify-end'>
+          <button
+            onClick={onClose}
+            className='px-3 py-2 text-sm text-gray-600 hover:text-gray-800'
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
+export default DrawingCanvasPortal

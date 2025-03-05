@@ -10,6 +10,7 @@ import {
   FiLayers,
   FiDroplet,
   FiZap,
+  FiEdit3,
 } from 'react-icons/fi'
 import { HexColorPicker } from 'react-colorful'
 
@@ -43,6 +44,10 @@ export type PlaygroundSettings = {
   animation: {
     speed: number
   }
+  customShapes: {
+    enabled: boolean
+    speed: number
+  }
 }
 
 export default function PlaygroundControls({
@@ -55,7 +60,7 @@ export default function PlaygroundControls({
 }: PlaygroundControlsProps) {
   const [visible, setVisible] = useState(isVisible)
   const [activeTab, setActiveTab] = useState<
-    'sphere' | 'floatingObjects' | 'background' | 'animation'
+    'sphere' | 'floatingObjects' | 'background' | 'animation' | 'shapes'
   >(
     activeControlPoint === 'color'
       ? 'sphere'
@@ -65,7 +70,7 @@ export default function PlaygroundControls({
       ? 'floatingObjects'
       : activeControlPoint === 'speed'
       ? 'animation'
-      : 'sphere'
+      : 'shapes'
   )
   const [settings, setSettings] = useState<PlaygroundSettings>(initialSettings)
   const [showingCode, setShowingCode] = useState(false)
@@ -81,6 +86,8 @@ export default function PlaygroundControls({
       setActiveTab('floatingObjects')
     } else if (activeControlPoint === 'speed') {
       setActiveTab('animation')
+    } else if (activeControlPoint === 'shapes') {
+      setActiveTab('shapes')
     }
   }, [activeControlPoint])
 
@@ -274,6 +281,17 @@ export default function PlaygroundControls({
                   >
                     <FiZap className='mr-2' size={16} />
                     <span>Anim</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('shapes')}
+                    className={`p-2 rounded-md ${
+                      activeTab === 'shapes'
+                        ? 'bg-primary text-white'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                    aria-label='Custom Shapes Settings'
+                  >
+                    <FiEdit3 className='w-5 h-5' />
                   </button>
                 </div>
 
@@ -703,6 +721,66 @@ export default function PlaygroundControls({
                         />
                       </div>
                     </>
+                  )}
+
+                  {/* Custom Shapes Tab */}
+                  {activeTab === 'shapes' && (
+                    <div className='w-full p-4'>
+                      <h3 className='text-lg font-semibold mb-3'>
+                        Custom Shapes
+                      </h3>
+
+                      <div className='mb-4'>
+                        <div className='flex justify-between items-center mb-2'>
+                          <span>Enable Custom Shapes</span>
+                          <label className='relative inline-flex items-center cursor-pointer'>
+                            <input
+                              type='checkbox'
+                              checked={settings.customShapes.enabled}
+                              onChange={() =>
+                                handleSettingChange(
+                                  'customShapes',
+                                  'enabled',
+                                  !settings.customShapes.enabled
+                                )
+                              }
+                              className='sr-only peer'
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className='mb-4'>
+                        <label className='block mb-2'>Animation Speed</label>
+                        <input
+                          type='range'
+                          min='0.1'
+                          max='2'
+                          step='0.1'
+                          value={settings.customShapes.speed}
+                          onChange={(e) =>
+                            handleSettingChange(
+                              'customShapes',
+                              'speed',
+                              parseFloat(e.target.value)
+                            )
+                          }
+                          className='w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700'
+                        />
+                        <div className='flex justify-between text-xs mt-1'>
+                          <span>Slow</span>
+                          <span>Fast</span>
+                        </div>
+                      </div>
+
+                      <div className='mt-6 bg-gray-100 dark:bg-gray-800 p-3 rounded text-sm'>
+                        <p>
+                          Draw shapes to create unique 3D objects that will
+                          appear in your scene!
+                        </p>
+                      </div>
+                    </div>
                   )}
                 </div>
               </>

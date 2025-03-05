@@ -17,6 +17,7 @@ import {
   SiNodedotjs,
   SiTailwindcss,
 } from 'react-icons/si'
+import CustomShapes, { ShapesProvider } from '../ui/CustomShapes'
 
 type AnimatedSphereProps = {
   color: string
@@ -143,36 +144,39 @@ const FloatingObjects = ({
   )
 }
 
+const DEFAULT_PLAYGROUND_SETTINGS: PlaygroundSettings = {
+  sphere: {
+    color: '#4a9eff',
+    emissive: '#094c8d',
+    distort: 0.3,
+    speed: 0.5,
+    roughness: 0.15,
+    metalness: 0.9,
+  },
+  floatingObjects: {
+    visible: true,
+    speed: 1.0,
+  },
+  background: {
+    primaryBlob: '#ffb7b7',
+    secondaryBlob: '#b7e4e0',
+    accentBlob: '#ffe2b7',
+  },
+  animation: {
+    speed: 1,
+  },
+  customShapes: {
+    enabled: true,
+    speed: 1,
+  },
+}
+
 export default function HeroSection() {
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Add a default settings constant to reset to if needed
-  const defaultPlaygroundSettings: PlaygroundSettings = {
-    sphere: {
-      color: '#3490dc',
-      emissive: '#094c8d',
-      distort: 0.3,
-      speed: 1.5,
-      roughness: 0.15,
-      metalness: 0.9,
-    },
-    floatingObjects: {
-      visible: true,
-      speed: 1.0,
-    },
-    background: {
-      primaryBlob: '#ffb7b7',
-      secondaryBlob: '#b7e4e0',
-      accentBlob: '#ffe2b7',
-    },
-    animation: {
-      speed: 1.0,
-    },
-  }
-
   const [playgroundSettings, setPlaygroundSettings] =
-    useState<PlaygroundSettings>(defaultPlaygroundSettings)
+    useState<PlaygroundSettings>(DEFAULT_PLAYGROUND_SETTINGS)
 
   // Replace the tutorial state with playground mode state
   const [playgroundMode, setPlaygroundMode] = useState(false)
@@ -238,7 +242,7 @@ export default function HeroSection() {
 
   // Reset playground settings to defaults
   const resetPlaygroundSettings = () => {
-    setPlaygroundSettings({ ...defaultPlaygroundSettings })
+    setPlaygroundSettings({ ...DEFAULT_PLAYGROUND_SETTINGS })
   }
 
   // Open controls with default tab
@@ -522,39 +526,66 @@ export default function HeroSection() {
             }}
             className='relative h-full w-full z-10'
           >
-            <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
-              <ambientLight intensity={0.6} />
-              <directionalLight position={[10, 10, 5]} intensity={1.5} />
-              <spotLight
-                position={[-10, -10, -5]}
-                intensity={1}
-                angle={0.4}
-                penumbra={1}
-              />
-              <group
-                position={[0, 0, 0]}
-                rotation={[0, cursorPos.x * 0.2, cursorPos.y * 0.2]}
-              >
-                <AnimatedSphere
-                  color={playgroundSettings.sphere.color}
-                  emissive={playgroundSettings.sphere.emissive}
-                  distort={playgroundSettings.sphere.distort}
+            {/* Wrap everything in ShapesProvider to share state */}
+            <ShapesProvider>
+              <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+                <ambientLight intensity={0.6} />
+                <directionalLight position={[10, 10, 5]} intensity={1.5} />
+                <spotLight
+                  position={[-10, -10, -5]}
+                  intensity={1}
+                  angle={0.4}
+                  penumbra={1}
+                />
+                <group
+                  position={[0, 0, 0]}
+                  rotation={[0, cursorPos.x * 0.2, cursorPos.y * 0.2]}
+                >
+                  <AnimatedSphere
+                    color={playgroundSettings.sphere.color}
+                    emissive={playgroundSettings.sphere.emissive}
+                    distort={playgroundSettings.sphere.distort}
+                    speed={
+                      playgroundSettings.sphere.speed *
+                      playgroundSettings.animation.speed
+                    }
+                    roughness={playgroundSettings.sphere.roughness}
+                    metalness={playgroundSettings.sphere.metalness}
+                  />
+                </group>
+                <FloatingObjects
+                  visible={playgroundSettings.floatingObjects.visible}
                   speed={
-                    playgroundSettings.sphere.speed *
+                    playgroundSettings.floatingObjects.speed *
                     playgroundSettings.animation.speed
                   }
-                  roughness={playgroundSettings.sphere.roughness}
-                  metalness={playgroundSettings.sphere.metalness}
                 />
-              </group>
-              <FloatingObjects
-                visible={playgroundSettings.floatingObjects.visible}
-                speed={
-                  playgroundSettings.floatingObjects.speed *
-                  playgroundSettings.animation.speed
-                }
-              />
-            </Canvas>
+                {playgroundSettings.customShapes.enabled && (
+                  <CustomShapes
+                    enabled={true}
+                    speed={
+                      playgroundSettings.customShapes.speed *
+                      playgroundSettings.animation.speed
+                    }
+                    shapesOnly={true}
+                  />
+                )}
+              </Canvas>
+
+              {/* Controls for CustomShapes with pointer events enabled */}
+              {playgroundSettings.customShapes.enabled && (
+                <div className='absolute inset-0 z-[450]'>
+                  <CustomShapes
+                    enabled={true}
+                    speed={
+                      playgroundSettings.customShapes.speed *
+                      playgroundSettings.animation.speed
+                    }
+                    uiOnly={true}
+                  />
+                </div>
+              )}
+            </ShapesProvider>
 
             {/* Enhanced decorative elements */}
             <div className='absolute -top-10 right-20 w-40 h-40 bg-secondary/20 rounded-full blur-3xl animate-pulse-slow'></div>
