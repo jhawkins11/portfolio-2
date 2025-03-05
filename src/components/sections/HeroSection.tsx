@@ -10,6 +10,13 @@ import PlaygroundControls, {
   PlaygroundSettings,
 } from '../ui/PlaygroundControls'
 import { FiChevronRight, FiTool } from 'react-icons/fi'
+import {
+  SiReact,
+  SiNextdotjs,
+  SiTypescript,
+  SiNodedotjs,
+  SiTailwindcss,
+} from 'react-icons/si'
 
 type AnimatedSphereProps = {
   color: string
@@ -154,9 +161,9 @@ export default function HeroSection() {
         speed: 1.0,
       },
       background: {
-        primaryBlob: '#ff6b6b',
-        secondaryBlob: '#4ecdc4',
-        accentBlob: '#ffd166',
+        primaryBlob: '#ffb7b7',
+        secondaryBlob: '#b7e4e0',
+        accentBlob: '#ffe2b7',
       },
       animation: {
         speed: 1.0,
@@ -239,11 +246,8 @@ export default function HeroSection() {
     // Mark that user has seen the animation/interacted with controls
     setHasSeenAnimation(true)
 
-    // Hide the CTA after user has engaged
+    // Reset button CTA to avoid multiple buttons appearing
     setShowButtonCTA(false)
-
-    // Debug logging to verify function is being called
-    console.log('Opening controls with tab:', tab || 'sphere')
   }
 
   const nameVariants = {
@@ -289,7 +293,10 @@ export default function HeroSection() {
       ></div>
 
       {/* Background grid with stronger presence */}
-      <div className='absolute inset-0 bg-gradient-grid bg-[size:25px_25px] opacity-[0.04] pointer-events-none'></div>
+      <div className='absolute inset-0 bg-grid-pattern pointer-events-none'></div>
+
+      {/* Add noise texture for more organic feel */}
+      <div className='bg-noise absolute inset-0 pointer-events-none'></div>
 
       {/* Content Container */}
       <div className='container mx-auto px-4 sm:px-6 lg:px-8 z-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12'>
@@ -314,7 +321,7 @@ export default function HeroSection() {
           </motion.div>
 
           {/* Name */}
-          <div className='overflow-hidden'>
+          <div className='relative'>
             <motion.h1
               className='text-6xl md:text-7xl lg:text-8xl font-bold mb-3 tracking-tight relative inline-flex flex-col'
               initial={{ opacity: 0 }}
@@ -329,7 +336,7 @@ export default function HeroSection() {
                 variants={nameVariants}
               >
                 Josiah
-                <div className='absolute -right-4 -top-4 w-8 h-8 rounded-full bg-secondary/40 blur-md animate-pulse'></div>
+                <div className='absolute right-0 top-0 w-8 h-8 rounded-full bg-secondary/40 blur-md animate-pulse -translate-y-4 translate-x-4'></div>
               </motion.span>
 
               <motion.span
@@ -340,7 +347,7 @@ export default function HeroSection() {
                 variants={nameVariants}
               >
                 Hawkins
-                <div className='absolute -left-4 -bottom-4 w-8 h-8 rounded-full bg-accent/40 blur-md animate-pulse animation-delay-2000'></div>
+                <div className='absolute left-0 bottom-0 w-8 h-8 rounded-full bg-accent/40 blur-md animate-pulse animation-delay-2000 translate-y-4 -translate-x-4'></div>
               </motion.span>
             </motion.h1>
           </div>
@@ -416,30 +423,35 @@ export default function HeroSection() {
                   color: 'bg-blue-500',
                   textColor: 'text-blue-500',
                   shadow: 'shadow-blue-500/20',
+                  icon: SiReact,
                 },
                 {
                   name: 'Next.js',
                   color: 'bg-black',
                   textColor: 'text-gray-800',
                   shadow: 'shadow-gray-800/20',
+                  icon: SiNextdotjs,
                 },
                 {
                   name: 'TypeScript',
                   color: 'bg-blue-600',
                   textColor: 'text-blue-600',
                   shadow: 'shadow-blue-600/20',
+                  icon: SiTypescript,
                 },
                 {
                   name: 'Node.js',
                   color: 'bg-green-600',
                   textColor: 'text-green-600',
                   shadow: 'shadow-green-600/20',
+                  icon: SiNodedotjs,
                 },
                 {
                   name: 'Tailwind',
                   color: 'bg-cyan-500',
                   textColor: 'text-cyan-500',
                   shadow: 'shadow-cyan-500/20',
+                  icon: SiTailwindcss,
                 },
               ].map((tech, i) => (
                 <motion.span
@@ -449,9 +461,7 @@ export default function HeroSection() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.9 + i * 0.1, duration: 0.5 }}
                 >
-                  <span
-                    className={`w-2.5 h-2.5 rounded-full ${tech.color} ring-2 ring-white/10`}
-                  ></span>
+                  <tech.icon className={`${tech.textColor} text-lg`} />
                   <span className={tech.textColor}>{tech.name}</span>
                 </motion.span>
               ))}
@@ -584,7 +594,7 @@ const passion = 'Building amazing apps';`}
             }}
           >
             <pre className='text-xs md:text-sm text-foreground/90 font-mono whitespace-pre-wrap'>
-              {`// 5+ years of full stack experience
+              {`// 3+ years of full stack experience
 function createImpact() {
   return 'Exceptional digital solutions';
 }`}
@@ -712,6 +722,12 @@ function createImpact() {
             // Only exit playground mode if explicitly closing
             if (!visible) {
               console.log('Controls closed')
+              // Reset state to avoid issues when reopening
+              setTimeout(() => {
+                if (!visible) {
+                  setActiveControlPoint(null)
+                }
+              }, 300)
             }
           }}
           lightTheme={true}
