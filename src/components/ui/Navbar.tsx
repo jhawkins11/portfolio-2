@@ -74,13 +74,22 @@ export default function Navbar() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <Link
-            href='/#hero'
-            className='relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent'
-          >
-            JH
+          <Link href='/#hero' className='relative z-10 flex items-center'>
+            <div className='relative inline-flex items-center justify-center'>
+              <div className='relative z-10 p-2'>
+                <motion.img
+                  src='/logo.svg'
+                  width={50}
+                  height={50}
+                  alt='JH Logo'
+                  className='logo'
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8 }}
+                />
+              </div>
+            </div>
           </Link>
-          <div className='absolute -inset-1 rounded-lg bg-primary/5 opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10'></div>
         </motion.div>
 
         {/* Desktop Navigation */}
