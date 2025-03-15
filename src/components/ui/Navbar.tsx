@@ -76,13 +76,13 @@ export default function Navbar() {
         >
           <Link href='/#hero' className='relative z-10 flex items-center'>
             <div className='relative inline-flex items-center justify-center'>
-              <div className='relative z-10 p-2'>
+              <div className='relative z-10 p-2 group transition-all duration-300 rounded-full hover:bg-primary/5'>
                 <motion.img
                   src='/logo.svg'
                   width={50}
                   height={50}
                   alt='JH Logo'
-                  className='logo'
+                  className='logo transition-all duration-300'
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.8 }}

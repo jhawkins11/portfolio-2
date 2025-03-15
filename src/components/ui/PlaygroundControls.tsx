@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback, memo } from 'react'
 import { motion } from 'framer-motion'
 import {
   FiSliders,
@@ -49,6 +49,82 @@ export type PlaygroundSettings = {
     speed: number
   }
 }
+
+// Create a stable wrapper component for the color picker with internal state management
+const ColorPickerWrapper = memo(
+  ({
+    isOpen,
+    color,
+    onChange,
+    onClose,
+  }: {
+    isOpen: boolean
+    color: string
+    onChange: (color: string) => void
+    onClose: () => void
+  }) => {
+    const pickerRef = useRef<HTMLDivElement>(null)
+    const [internalColor, setInternalColor] = useState(color)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    // Sync internal color when prop changes
+    useEffect(() => {
+      setInternalColor(color)
+    }, [color])
+
+    useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+        if (
+          pickerRef.current &&
+          !pickerRef.current.contains(event.target as Node) &&
+          isOpen
+        ) {
+          onClose()
+        }
+      }
+
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+        // Clear any pending timeouts
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current)
+        }
+      }
+    }, [isOpen, onClose])
+
+    // Handle color change with debouncing to reduce state updates
+    const handleColorChange = useCallback(
+      (newColor: string) => {
+        setInternalColor(newColor)
+
+        // Clear any existing timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current)
+        }
+
+        // Set a new timeout to actually update the parent
+        timeoutRef.current = setTimeout(() => {
+          // Only propagate valid hex colors
+          if (/^#([0-9A-F]{3}){1,2}$/i.test(newColor)) {
+            onChange(newColor)
+          }
+        }, 100) // 100ms debounce
+      },
+      [onChange]
+    )
+
+    if (!isOpen) return null
+
+    return (
+      <div className='mt-2 p-2 rounded bg-white shadow-lg' ref={pickerRef}>
+        <HexColorPicker color={internalColor} onChange={handleColorChange} />
+      </div>
+    )
+  }
+)
+
+ColorPickerWrapper.displayName = 'ColorPickerWrapper'
 
 export default function PlaygroundControls({
   initialSettings,
@@ -111,22 +187,30 @@ export default function PlaygroundControls({
     }
   }
 
-  // Update parent component when settings change
-  const handleSettingChange = (
-    category: keyof PlaygroundSettings,
-    property: string,
-    value: number | string | boolean
-  ) => {
-    const newSettings = {
-      ...settings,
-      [category]: {
-        ...settings[category],
-        [property]: value,
-      },
-    }
-    setSettings(newSettings)
-    onSettingsChange(newSettings)
-  }
+  // Create a debounced function for handling setting changes
+  const handleSettingChange = useCallback(
+    (
+      category: keyof PlaygroundSettings,
+      property: string,
+      value: number | string | boolean
+    ) => {
+      // Create a new settings object to avoid mutating the existing one
+      const newSettings = {
+        ...settings,
+        [category]: {
+          ...settings[category],
+          [property]: value,
+        },
+      }
+
+      // Update local state first
+      setSettings(newSettings)
+
+      // Update parent component
+      onSettingsChange(newSettings)
+    },
+    [settings, onSettingsChange]
+  )
 
   const resetSettings = () => {
     // Use a fresh copy of the initial settings
@@ -179,6 +263,21 @@ export default function PlaygroundControls({
   }
 
   const theme = getThemeClasses()
+
+  // Simplified color change handler
+  const handleColorChange = useCallback(
+    (category: keyof PlaygroundSettings, property: string, color: string) => {
+      // Only update if color is valid (prevents erratic behavior)
+      if (/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
+        handleSettingChange(category, property, color)
+      }
+    },
+    [handleSettingChange]
+  )
+
+  const closeColorPicker = useCallback(() => {
+    setColorPickerOpen(null)
+  }, [])
 
   return (
     <motion.div
@@ -323,7 +422,7 @@ export default function PlaygroundControls({
                               type='text'
                               value={settings.sphere.color}
                               onChange={(e) =>
-                                handleSettingChange(
+                                handleColorChange(
                                   'sphere',
                                   'color',
                                   e.target.value
@@ -333,14 +432,14 @@ export default function PlaygroundControls({
                             />
                           </div>
                           {colorPickerOpen === 'sphereColor' && (
-                            <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                              <HexColorPicker
-                                color={settings.sphere.color}
-                                onChange={(color) =>
-                                  handleSettingChange('sphere', 'color', color)
-                                }
-                              />
-                            </div>
+                            <ColorPickerWrapper
+                              isOpen={colorPickerOpen === 'sphereColor'}
+                              color={settings.sphere.color}
+                              onChange={(color) =>
+                                handleColorChange('sphere', 'color', color)
+                              }
+                              onClose={closeColorPicker}
+                            />
                           )}
                         </div>
 
@@ -368,7 +467,7 @@ export default function PlaygroundControls({
                               type='text'
                               value={settings.sphere.emissive}
                               onChange={(e) =>
-                                handleSettingChange(
+                                handleColorChange(
                                   'sphere',
                                   'emissive',
                                   e.target.value
@@ -378,18 +477,14 @@ export default function PlaygroundControls({
                             />
                           </div>
                           {colorPickerOpen === 'emissive' && (
-                            <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                              <HexColorPicker
-                                color={settings.sphere.emissive}
-                                onChange={(color) =>
-                                  handleSettingChange(
-                                    'sphere',
-                                    'emissive',
-                                    color
-                                  )
-                                }
-                              />
-                            </div>
+                            <ColorPickerWrapper
+                              isOpen={colorPickerOpen === 'emissive'}
+                              color={settings.sphere.emissive}
+                              onChange={(color) =>
+                                handleColorChange('sphere', 'emissive', color)
+                              }
+                              onClose={closeColorPicker}
+                            />
                           )}
                         </div>
 
@@ -568,7 +663,7 @@ export default function PlaygroundControls({
                             type='text'
                             value={settings.background.primaryBlob}
                             onChange={(e) =>
-                              handleSettingChange(
+                              handleColorChange(
                                 'background',
                                 'primaryBlob',
                                 e.target.value
@@ -578,18 +673,18 @@ export default function PlaygroundControls({
                           />
                         </div>
                         {colorPickerOpen === 'primaryBlob' && (
-                          <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                            <HexColorPicker
-                              color={settings.background.primaryBlob}
-                              onChange={(color) =>
-                                handleSettingChange(
-                                  'background',
-                                  'primaryBlob',
-                                  color
-                                )
-                              }
-                            />
-                          </div>
+                          <ColorPickerWrapper
+                            isOpen={colorPickerOpen === 'primaryBlob'}
+                            color={settings.background.primaryBlob}
+                            onChange={(color) =>
+                              handleColorChange(
+                                'background',
+                                'primaryBlob',
+                                color
+                              )
+                            }
+                            onClose={closeColorPicker}
+                          />
                         )}
                       </div>
 
@@ -618,7 +713,7 @@ export default function PlaygroundControls({
                             type='text'
                             value={settings.background.secondaryBlob}
                             onChange={(e) =>
-                              handleSettingChange(
+                              handleColorChange(
                                 'background',
                                 'secondaryBlob',
                                 e.target.value
@@ -628,18 +723,18 @@ export default function PlaygroundControls({
                           />
                         </div>
                         {colorPickerOpen === 'secondaryBlob' && (
-                          <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                            <HexColorPicker
-                              color={settings.background.secondaryBlob}
-                              onChange={(color) =>
-                                handleSettingChange(
-                                  'background',
-                                  'secondaryBlob',
-                                  color
-                                )
-                              }
-                            />
-                          </div>
+                          <ColorPickerWrapper
+                            isOpen={colorPickerOpen === 'secondaryBlob'}
+                            color={settings.background.secondaryBlob}
+                            onChange={(color) =>
+                              handleColorChange(
+                                'background',
+                                'secondaryBlob',
+                                color
+                              )
+                            }
+                            onClose={closeColorPicker}
+                          />
                         )}
                       </div>
 
@@ -667,7 +762,7 @@ export default function PlaygroundControls({
                             type='text'
                             value={settings.background.accentBlob}
                             onChange={(e) =>
-                              handleSettingChange(
+                              handleColorChange(
                                 'background',
                                 'accentBlob',
                                 e.target.value
@@ -677,18 +772,18 @@ export default function PlaygroundControls({
                           />
                         </div>
                         {colorPickerOpen === 'accentBlob' && (
-                          <div className='mt-2 p-2 rounded bg-white shadow-lg'>
-                            <HexColorPicker
-                              color={settings.background.accentBlob}
-                              onChange={(color) =>
-                                handleSettingChange(
-                                  'background',
-                                  'accentBlob',
-                                  color
-                                )
-                              }
-                            />
-                          </div>
+                          <ColorPickerWrapper
+                            isOpen={colorPickerOpen === 'accentBlob'}
+                            color={settings.background.accentBlob}
+                            onChange={(color) =>
+                              handleColorChange(
+                                'background',
+                                'accentBlob',
+                                color
+                              )
+                            }
+                            onClose={closeColorPicker}
+                          />
                         )}
                       </div>
                     </>

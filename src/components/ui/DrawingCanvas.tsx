@@ -9,6 +9,7 @@ import {
   FiMaximize,
   FiLayers,
   FiInfo,
+  FiDroplet,
 } from 'react-icons/fi'
 
 type Point = {
@@ -25,6 +26,7 @@ type Path = {
 type ShapeWithHoles = {
   outerShape: Point[]
   holes: Point[][]
+  materialType?: string
 }
 
 type DrawingCanvasProps = {
@@ -46,6 +48,8 @@ export default function DrawingCanvas({
   const [smoothMode, setSmoothMode] = useState(true)
   const [holeModeActive, setHoleModeActive] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [materialType, setMaterialType] = useState<string>('standard')
+  const [showMaterialMenu, setShowMaterialMenu] = useState(false)
 
   // Clear the canvas and reset paths
   const clearCanvas = () => {
@@ -166,7 +170,10 @@ export default function DrawingCanvas({
     // The largest path should never be a hole (unless explicitly set)
     const processedPaths = pathsWithArea.map((path, index) => {
       // If this path was explicitly set as a hole by the user, respect that setting
-      if (path.isHole) return path
+      if (path.isHole) {
+        // Ensure the hole is properly oriented (clockwise)
+        return { ...path, isHole: true }
+      }
 
       // The largest path is never a hole (unless explicitly set by user)
       if (index === 0) return { ...path, isHole: false }
@@ -180,6 +187,7 @@ export default function DrawingCanvas({
           // Only consider non-hole paths as containers
           if (otherPath.isHole) return false
 
+          // Check if the centroid of this path is inside the other path
           return isPointInPath(path.centroid, otherPath.points)
         }
       )
@@ -409,11 +417,15 @@ export default function DrawingCanvas({
       'holes'
     )
 
-    // Send both outer shape and holes to parent
-    onShapeCreated({
+    // Let's create the shape with the selected material
+    const shapeWithHoles: ShapeWithHoles = {
       outerShape: normalizedOuterShape,
       holes: normalizedHoles,
-    })
+      materialType: materialType,
+    }
+
+    console.log('Created shape with material:', materialType)
+    onShapeCreated(shapeWithHoles)
 
     // Clear canvas for next drawing
     clearCanvas()
@@ -494,10 +506,10 @@ export default function DrawingCanvas({
   }, [paths, currentPath, strokeWidth, smoothMode, holeModeActive])
 
   return (
-    <div className='flex flex-col items-center z-10000'>
+    <div className='relative flex flex-col items-center'>
       {/* Show help overlay */}
       {showHelp && (
-        <div className='absolute inset-0 bg-black/70 z-[100] flex items-center justify-center p-4'>
+        <div className='fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4'>
           <div className='bg-white rounded-lg p-4 max-w-sm'>
             <h4 className='font-bold mb-2'>How to draw complex shapes:</h4>
             <ol className='list-decimal pl-5 mb-3 text-sm space-y-2'>
@@ -524,7 +536,11 @@ export default function DrawingCanvas({
         </div>
       )}
 
-      <div className='relative mb-2'>
+      {/* Main drawing container with fixed height to prevent layout shifts */}
+      <div
+        className='relative mb-2 rounded-lg overflow-hidden border border-gray-200 shadow-inner bg-white'
+        style={{ width: `${width}px`, height: `${height}px` }}
+      >
         <canvas
           ref={canvasRef}
           width={width}
@@ -536,31 +552,205 @@ export default function DrawingCanvas({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          className='border border-gray-300 rounded-lg bg-white shadow-lg touch-none'
-        />
+          className='absolute inset-0 z-10 touch-none'
+        ></canvas>
 
-        {/* Drawing mode indicator */}
-        <div className='absolute top-2 left-2 text-xs py-1 px-2 rounded-md bg-white/80 backdrop-blur-sm shadow-sm'>
+        {/* Mode indicator */}
+        <div className='absolute top-2 left-2 text-xs py-1 px-2 rounded-md bg-white/90 backdrop-blur-sm shadow-sm'>
           {holeModeActive ? (
-            <span className='text-orange-500 font-medium flex items-center'>
+            <span className='flex items-center text-orange-600 font-semibold'>
               <FiLayers className='mr-1' /> Hole Mode
             </span>
           ) : (
-            <span className='text-blue-500 font-medium flex items-center'>
+            <span className='flex items-center text-blue-600 font-semibold'>
               <FiLayers className='mr-1' /> Shape Mode
             </span>
           )}
         </div>
 
-        {/* Path counter */}
-        {paths.length > 0 && (
-          <div className='absolute top-2 right-2 text-xs py-1 px-2 rounded-md bg-white/80 backdrop-blur-sm shadow-sm'>
-            {paths.length} path{paths.length !== 1 ? 's' : ''}
+        {/* Material indicator - moved to top-right */}
+        <div className='absolute top-2 right-2 text-xs py-1 px-2 rounded-md bg-white/80 backdrop-blur-sm shadow-sm flex items-center gap-1'>
+          <FiDroplet
+            className={`
+            ${materialType === 'standard' ? 'text-blue-600' : ''}
+            ${materialType === 'glass' ? 'text-cyan-600' : ''}
+            ${materialType === 'metal' ? 'text-gray-600' : ''}
+            ${materialType === 'plastic' ? 'text-purple-600' : ''}
+          `}
+          />
+          <span className='capitalize'>{materialType}</span>
+        </div>
+      </div>
+
+      {/* Fixed height space for material menu to prevent layout shifts */}
+      <div className='mb-2 pb-2 w-full flex justify-center'>
+        {/* Material selection menu */}
+        {showMaterialMenu && (
+          <div className='p-4 bg-white/95 backdrop-blur-md rounded-lg shadow-md border border-gray-200 mb-2 w-full max-w-[300px]'>
+            <div className='flex justify-between items-center mb-2'>
+              <h4 className='text-sm font-medium text-gray-700 flex items-center'>
+                <FiDroplet className='mr-1' /> Material Type
+              </h4>
+              <button
+                onClick={() => setShowMaterialMenu(false)}
+                className='text-gray-500 hover:text-gray-700 transition-colors'
+                aria-label='Close material menu'
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-4 w-4'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M6 18L18 6M6 6l12 12'
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className='grid grid-cols-1 gap-2'>
+              <button
+                onClick={() => {
+                  setMaterialType('standard')
+                  setShowMaterialMenu(false)
+                }}
+                className={`px-3 py-2.5 text-sm rounded-md flex items-center justify-between transition-all duration-200 ${
+                  materialType === 'standard'
+                    ? 'bg-blue-100 text-blue-700 font-medium ring-2 ring-blue-300 ring-opacity-50'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span className='flex items-center gap-2'>
+                  <FiDroplet className='text-blue-600' />
+                  <span className='capitalize'>Standard</span>
+                </span>
+                {materialType === 'standard' && (
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-4 w-4 text-blue-600'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M5 13l4 4L19 7'
+                    />
+                  </svg>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setMaterialType('glass')
+                  setShowMaterialMenu(false)
+                }}
+                className={`px-3 py-2.5 text-sm rounded-md flex items-center justify-between transition-all duration-200 ${
+                  materialType === 'glass'
+                    ? 'bg-cyan-100 text-cyan-700 font-medium ring-2 ring-cyan-300 ring-opacity-50'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span className='flex items-center gap-2'>
+                  <FiDroplet className='text-cyan-600' />
+                  <span className='capitalize'>Glass</span>
+                </span>
+                {materialType === 'glass' && (
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-4 w-4 text-cyan-600'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M5 13l4 4L19 7'
+                    />
+                  </svg>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setMaterialType('metal')
+                  setShowMaterialMenu(false)
+                }}
+                className={`px-3 py-2.5 text-sm rounded-md flex items-center justify-between transition-all duration-200 ${
+                  materialType === 'metal'
+                    ? 'bg-gray-100 text-gray-700 font-medium ring-2 ring-gray-300 ring-opacity-50'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span className='flex items-center gap-2'>
+                  <FiDroplet className='text-gray-600' />
+                  <span className='capitalize'>Metal</span>
+                </span>
+                {materialType === 'metal' && (
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-4 w-4 text-gray-600'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M5 13l4 4L19 7'
+                    />
+                  </svg>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setMaterialType('plastic')
+                  setShowMaterialMenu(false)
+                }}
+                className={`px-3 py-2.5 text-sm rounded-md flex items-center justify-between transition-all duration-200 ${
+                  materialType === 'plastic'
+                    ? 'bg-purple-100 text-purple-700 font-medium ring-2 ring-purple-300 ring-opacity-50'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span className='flex items-center gap-2'>
+                  <FiDroplet className='text-purple-600' />
+                  <span className='capitalize'>Plastic</span>
+                </span>
+                {materialType === 'plastic' && (
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-4 w-4 text-purple-600'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M5 13l4 4L19 7'
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      <div className='flex flex-wrap justify-center gap-2 mt-2'>
+      {/* Control buttons */}
+      <div className='flex flex-wrap justify-center gap-2'>
         <motion.button
           onClick={() => setHoleModeActive(!holeModeActive)}
           whileHover={{ scale: 1.1 }}
@@ -579,6 +769,32 @@ export default function DrawingCanvas({
           />
         </motion.button>
 
+        {/* Material selection button */}
+        <motion.button
+          onClick={() => setShowMaterialMenu(!showMaterialMenu)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className={`p-2 ${
+            showMaterialMenu
+              ? 'bg-blue-100 hover:bg-blue-200'
+              : 'bg-gray-100 hover:bg-gray-200'
+          } rounded-full`}
+          aria-label='Select material'
+        >
+          <FiDroplet
+            className={`w-5 h-5 ${
+              materialType === 'standard'
+                ? 'text-blue-600'
+                : materialType === 'glass'
+                ? 'text-cyan-600'
+                : materialType === 'metal'
+                ? 'text-gray-600'
+                : 'text-purple-600'
+            }`}
+          />
+        </motion.button>
+
+        {/* Existing buttons */}
         <motion.button
           onClick={() => setStrokeWidth((prev) => Math.max(1, prev - 1))}
           whileHover={{ scale: 1.1 }}

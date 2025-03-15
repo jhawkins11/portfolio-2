@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import DrawingCanvas from './DrawingCanvas'
-import { FiInfo } from 'react-icons/fi'
 
 type Point = {
   x: number
@@ -14,6 +13,7 @@ type Point = {
 type ShapeWithHoles = {
   outerShape: Point[]
   holes: Point[][]
+  materialType?: string
 }
 
 type DrawingCanvasPortalProps = {
@@ -22,58 +22,71 @@ type DrawingCanvasPortalProps = {
   isOpen: boolean
 }
 
-const DrawingCanvasPortal = ({
+export default function DrawingCanvasPortal({
   onShapeCreated,
   onClose,
   isOpen,
-}: DrawingCanvasPortalProps) => {
-  const [mounted, setMounted] = useState(false)
-  const [showTip, setShowTip] = useState(true)
+}: DrawingCanvasPortalProps) {
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Log portal state
+  console.log('DrawingCanvasPortal rendering with isOpen:', isOpen)
 
   useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
+    setIsMounted(true)
+    return () => {
+      setIsMounted(false)
+    }
   }, [])
 
-  useEffect(() => {
-    if (isOpen) {
-      // Show the tip for 5 seconds when the portal opens
-      setShowTip(true)
-      const timer = setTimeout(() => {
-        setShowTip(false)
-      }, 5000)
+  // Early return if not mounted (SSR) or not open
+  if (!isMounted || !isOpen) return null
 
-      return () => clearTimeout(timer)
-    }
-  }, [isOpen])
-
+  // Handle shape creation with validation
   const handleShapeCreated = (shapeData: Point[] | ShapeWithHoles) => {
-    console.log('DrawingCanvasPortal received shape data:', shapeData)
+    console.log('DrawingCanvasPortal: Shape creation called')
 
     // Validate shape data
-    const isShapeWithHoles = (data: any): data is ShapeWithHoles =>
-      data &&
+    const isShapeWithHoles = (data: unknown): data is ShapeWithHoles =>
+      data !== null &&
       typeof data === 'object' &&
       !Array.isArray(data) &&
       'outerShape' in data &&
       'holes' in data
 
     if (isShapeWithHoles(shapeData)) {
+      console.log('DrawingCanvasPortal: Complex shape created with', {
+        outerPoints: shapeData.outerShape.length,
+        holes: shapeData.holes.length,
+        material: shapeData.materialType,
+      })
+
       if (shapeData.outerShape.length >= 3) {
+        console.log(
+          'DrawingCanvasPortal: Passing valid complex shape to parent handler'
+        )
         onShapeCreated(shapeData)
         onClose()
       } else {
-        console.error('Shape creation failed: Not enough points in outer shape')
+        console.error(
+          'DrawingCanvasPortal: Invalid shape - not enough points in outer shape'
+        )
       }
     } else if (Array.isArray(shapeData) && shapeData.length >= 3) {
+      console.log(
+        'DrawingCanvasPortal: Simple shape created with',
+        shapeData.length,
+        'points'
+      )
+      console.log(
+        'DrawingCanvasPortal: Passing valid simple shape to parent handler'
+      )
       onShapeCreated(shapeData)
       onClose()
     } else {
-      console.error('Shape creation failed: Invalid shape data')
+      console.error('DrawingCanvasPortal: Invalid shape data', shapeData)
     }
   }
-
-  if (!mounted || !isOpen) return null
 
   // Use createPortal to render outside the normal DOM hierarchy
   return createPortal(
@@ -118,5 +131,3 @@ const DrawingCanvasPortal = ({
     document.body
   )
 }
-
-export default DrawingCanvasPortal

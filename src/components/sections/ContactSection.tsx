@@ -294,7 +294,7 @@ export default function ContactSection() {
                               ? 'noopener noreferrer'
                               : undefined
                           }
-                          className='text-muted-foreground hover:text-primary transition-colors'
+                          className='text-muted-foreground hover:text-primary transition-colors duration-300 hover:underline hover:underline-offset-4 rounded px-1 py-0.5 -mx-1 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-primary after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left'
                         >
                           {item.value}
                         </a>

@@ -95,12 +95,12 @@
   }
 
   .button-primary {
-    @apply relative bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-md overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg;
+    @apply relative bg-primary text-white px-6 py-3 rounded-md overflow-hidden shadow-md transition-all duration-300 hover:bg-primary/90 hover:shadow-lg hover:translate-y-[-2px];
   }
 
   .button-primary::after {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-primary via-accent to-secondary opacity-0 transition-opacity duration-300;
+    @apply absolute inset-0 bg-gradient-to-r from-primary via-accent to-secondary opacity-0 transition-all duration-300;
   }
 
   .button-primary:hover::after {
@@ -216,6 +216,37 @@ pre::-webkit-scrollbar-thumb {
 
 pre::-webkit-scrollbar-thumb:hover {
   background-color: rgba(var(--primary-rgb), 0.3);
+}
+
+/* Make code blocks less prominent */
+pre,
+code {
+  font-size: 0.85rem; /* Smaller default text size */
+}
+
+@media (max-height: 800px) {
+  pre,
+  code {
+    font-size: 0.75rem; /* Even smaller text on shorter screens */
+  }
+}
+
+/* Reduce the visual impact of code blocks */
+pre {
+  background-color: rgba(var(--muted-rgb), 0.3); /* More transparent */
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+  border: 1px solid rgba(var(--muted-foreground-rgb), 0.1);
+}
+
+/* Inline code should be less distracting */
+:not(pre) > code {
+  padding: 0.1em 0.3em;
+  border-radius: 0.3em;
+  background-color: rgba(var(--muted-rgb), 0.3);
+  color: var(--foreground);
+  font-weight: 500;
 }
 
 .whitespace-pre-wrap {

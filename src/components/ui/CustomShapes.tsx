@@ -1,8 +1,15 @@
 'use client'
 
-import { useState, createContext, useContext } from 'react'
+import {
+  useState,
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+} from 'react'
 import { motion } from 'framer-motion'
 import { FiPlus, FiTool } from 'react-icons/fi'
+import { useFrame } from '@react-three/fiber'
 
 import ShapeGenerator from './ShapeGenerator'
 import DrawingCanvasPortal from './DrawingCanvasPortal'
@@ -12,10 +19,12 @@ const ShapesContext = createContext<{
   shapes: CustomShape[]
   addShape: (shapeData: Point[] | ShapeWithHoles) => void
   clearShapes: () => void
+  setShapes: React.Dispatch<React.SetStateAction<CustomShape[]>>
 }>({
   shapes: [],
   addShape: () => {},
   clearShapes: () => {},
+  setShapes: () => {},
 })
 
 type Point = {
@@ -27,16 +36,22 @@ type Point = {
 type ShapeWithHoles = {
   outerShape: Point[]
   holes: Point[][]
+  materialType?: string
 }
 
 type CustomShape = {
   id: string
   points: Point[]
-  holes?: Point[][] // Added support for holes
+  holes?: Point[][]
   color: string
   height: number
   speed: number
   position: [number, number, number]
+  materialType?: string
+  entranceProgress?: number
+  entranceDelay?: number
+  entranceDuration?: number
+  entranceEffect?: string
 }
 
 type CustomShapesProps = {
@@ -45,49 +60,130 @@ type CustomShapesProps = {
   standalone?: boolean
   uiOnly?: boolean
   shapesOnly?: boolean
+  onSettingsClick?: (() => void) | null
 }
 
 // Track which positions have been used to avoid duplicates
 let usedPositionIndices: number[] = []
 
-// Generate random color in the blue/purple/pink spectrum
-const getRandomColor = () => {
-  const hue = Math.floor(Math.random() * 60) + 210 // 210-270 range (blue to purple)
-  const saturation = Math.floor(Math.random() * 20) + 70 // 70-90%
-  const lightness = Math.floor(Math.random() * 20) + 50 // 50-70%
+// Enhanced entrance animation with various effects
+const entranceEffects = ['pop', 'slide', 'spiral', 'bounce', 'fade']
 
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`
+// Generate random color in the blue/purple/pink spectrum with more variety
+const getRandomColor = () => {
+  // More varied color palette
+  const palettes = [
+    // Blue to purple range
+    {
+      hue: Math.floor(Math.random() * 60) + 210,
+      saturation: Math.floor(Math.random() * 30) + 65,
+      lightness: Math.floor(Math.random() * 25) + 50,
+    },
+    // Pink to red range
+    {
+      hue: Math.floor(Math.random() * 40) + 320,
+      saturation: Math.floor(Math.random() * 20) + 70,
+      lightness: Math.floor(Math.random() * 20) + 55,
+    },
+    // Teal to cyan range
+    {
+      hue: Math.floor(Math.random() * 40) + 170,
+      saturation: Math.floor(Math.random() * 25) + 70,
+      lightness: Math.floor(Math.random() * 20) + 50,
+    },
+    // Occasional gold/yellow (rarer)
+    {
+      hue: Math.floor(Math.random() * 30) + 40,
+      saturation: Math.floor(Math.random() * 20) + 75,
+      lightness: Math.floor(Math.random() * 15) + 60,
+    },
+  ]
+
+  // Pick a random palette with weighted probability
+  const rand = Math.random()
+  const palette =
+    rand < 0.4
+      ? palettes[0]
+      : rand < 0.7
+      ? palettes[1]
+      : rand < 0.9
+      ? palettes[2]
+      : palettes[3]
+
+  return `hsl(${palette.hue}, ${palette.saturation}%, ${palette.lightness}%)`
 }
 
-// Generate position from predefined good viewable locations
+// Generate position from expanded set of positions for better distribution
 const getShapePosition = (): [number, number, number] => {
-  // Predefined positions that work well visually (x, y, z)
+  // Expanded set of positions that work well visually (x, y, z)
   const predefinedPositions: [number, number, number][] = [
-    // Top right quadrant positions
-    [1.5, 1.2, 1.2],
-    [1.2, 1.5, 0.8],
-    [1.6, 0.8, 1.0],
+    // Far left positions
+    [-6.0, 3.5, -4.0],
+    [-5.8, 1.8, -3.5],
+    [-5.5, -1.5, -3.0],
+    [-5.2, -3.0, -4.0],
 
-    // Top left quadrant positions
-    [-1.5, 1.2, 1.2],
-    [-1.2, 1.5, 0.8],
-    [-1.6, 0.8, 1.0],
+    // Left positions
+    [-4.2, 4.0, -3.0],
+    [-3.8, 2.5, -2.5],
+    [-3.5, 0.8, -2.0],
+    [-3.7, -2.2, -3.0],
+    [-4.0, -3.5, -4.0],
 
-    // Bottom right quadrant positions
-    [1.5, -1.2, 1.2],
-    [1.2, -1.5, 0.8],
-    [1.6, -0.8, 1.0],
+    // Left-center positions
+    [-2.6, 3.3, -2.5],
+    [-2.3, 1.4, -3.5],
+    [-2.5, -0.8, -2.8],
+    [-2.0, -2.8, -3.0],
 
-    // Bottom left quadrant positions
-    [-1.5, -1.2, 1.2],
-    [-1.2, -1.5, 0.8],
-    [-1.6, -0.8, 1.0],
+    // Center-left positions (spaced out from center)
+    [-1.5, 3.0, -2.0],
+    [-1.3, 1.0, -3.0],
+    [-1.2, -1.0, -2.5],
+    [-1.4, -3.0, -3.5],
 
-    // Additional positions with good visibility
-    [0, 1.7, 1.2], // Top center
-    [0, -1.7, 1.2], // Bottom center
-    [1.7, 0, 1.2], // Right center
-    [-1.7, 0, 1.2], // Left center
+    // Center-right positions (spaced out from center)
+    [1.5, 3.0, -2.0],
+    [1.3, 1.0, -3.0],
+    [1.2, -1.0, -2.5],
+    [1.4, -3.0, -3.5],
+
+    // Right-center positions
+    [2.6, 3.3, -2.5],
+    [2.3, 1.4, -3.5],
+    [2.5, -0.8, -2.8],
+    [2.0, -2.8, -3.0],
+
+    // Right positions
+    [4.2, 4.0, -3.0],
+    [3.8, 2.5, -2.5],
+    [3.5, 0.8, -2.0],
+    [3.7, -2.2, -3.0],
+    [4.0, -3.5, -4.0],
+
+    // Far right positions
+    [6.0, 3.5, -4.0],
+    [5.8, 1.8, -3.5],
+    [5.5, -1.5, -3.0],
+    [5.2, -3.0, -4.0],
+
+    // Extreme positions for more diversity
+    [7.0, 2.0, -5.5],
+    [6.5, -2.0, -5.0],
+    [-7.0, 2.0, -5.5],
+    [-6.5, -2.0, -5.0],
+    [0, 6.0, -6.0],
+    [0, -6.0, -6.0],
+
+    // Foreground positions (closer to camera)
+    [2.0, 1.0, -0.5],
+    [-2.0, -1.0, -0.5],
+    [1.2, -1.2, -0.3],
+    [-1.2, 1.2, -0.3],
+    [3.0, 0.0, -0.8],
+    [-3.0, 0.0, -0.8],
+    [0, 2.5, -0.6],
+    [0, -2.5, -0.6],
   ]
 
   // Find available positions
@@ -125,7 +221,37 @@ function ShapesRenderer({
   shapes: CustomShape[]
   speed: number
 }) {
+  const { setShapes } = useContext(ShapesContext)
   console.log('Rendering ShapesRenderer with', shapes.length, 'shapes')
+
+  // Add animation logic for shapes entrance
+  useFrame((state) => {
+    // Clone the shapes array to avoid mutating the original
+    const updatedShapes = [...shapes]
+    let hasUpdates = false
+
+    // Animate each shape's entrance
+    updatedShapes.forEach((shape) => {
+      if (shape.entranceProgress !== undefined && shape.entranceProgress < 1) {
+        // Only start animating after the delay has passed
+        if (state.clock.elapsedTime > (shape.entranceDelay || 0)) {
+          // Calculate how much progress to add based on frame time and duration
+          // @ts-expect-error - delta exists on state but is missing in types
+          const progressStep = state.delta / (shape.entranceDuration || 0.5)
+          shape.entranceProgress = Math.min(
+            1,
+            (shape.entranceProgress || 0) + progressStep
+          )
+          hasUpdates = true
+        }
+      }
+    })
+
+    // Only update state if changes were made
+    if (hasUpdates) {
+      setShapes(updatedShapes)
+    }
+  })
 
   return (
     <>
@@ -138,6 +264,9 @@ function ShapesRenderer({
           height={shape.height}
           speed={shape.speed * speed}
           position={shape.position}
+          materialType={shape.materialType}
+          entranceProgress={shape.entranceProgress || 1}
+          entranceEffect={shape.entranceEffect}
         />
       ))}
     </>
@@ -148,7 +277,7 @@ function ShapesRenderer({
 export function ShapesProvider({ children }: { children: React.ReactNode }) {
   const [shapes, setShapes] = useState<CustomShape[]>([])
 
-  const addShape = (shapeData: Point[] | ShapeWithHoles) => {
+  const addShape = useCallback((shapeData: Point[] | ShapeWithHoles) => {
     // Check if we received a shape with holes
     const isShapeWithHoles = (
       data: Point[] | ShapeWithHoles
@@ -161,19 +290,31 @@ export function ShapesProvider({ children }: { children: React.ReactNode }) {
 
     let points: Point[]
     let holes: Point[][] | undefined
+    let materialType: string | undefined
 
     if (isShapeWithHoles(shapeData)) {
-      console.log('Adding complex shape with', shapeData.holes.length, 'holes')
+      console.log(
+        'ShapesProvider: Adding complex shape with',
+        shapeData.holes.length,
+        'holes and material',
+        shapeData.materialType
+      )
       points = shapeData.outerShape
       holes = shapeData.holes
+      materialType = shapeData.materialType
 
       if (points.length < 3) {
         console.warn('Not enough points in outer shape (minimum 3 required)')
         return
       }
     } else {
-      console.log('Adding simple shape with', shapeData.length, 'points')
+      console.log(
+        'ShapesProvider: Adding simple shape with',
+        shapeData.length,
+        'points'
+      )
       points = shapeData
+      materialType = undefined
 
       if (points.length < 3) {
         console.warn('Not enough points to create a shape (minimum 3 required)')
@@ -181,27 +322,52 @@ export function ShapesProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // Pick random entrance animation effect
+    const entranceEffect =
+      entranceEffects[Math.floor(Math.random() * entranceEffects.length)]
+
     const newShape: CustomShape = {
       id: Date.now().toString(),
       points,
       holes,
       color: getRandomColor(),
-      height: Math.random() * 0.2 + 0.2, // 0.2 to 0.4 (more consistent height)
-      speed: Math.random() * 0.3 + 0.5, // 0.5 to 0.8 (slower rotation)
+      height: Math.random() * 0.3 + 0.2, // 0.2 to 0.5 (more varied heights)
+      speed: Math.random() * 0.4 + 0.4, // 0.4 to 0.8 (more varied speeds)
       position: getShapePosition(),
+      materialType: materialType || randomizeMaterial(),
+      entranceProgress: 0,
+      entranceDelay: Math.random() * 0.8, // More varied delays for staggered appearance
+      entranceDuration: Math.random() * 0.8 + 0.7, // 0.7 to 1.5 seconds duration (slower for more visible effect)
+      entranceEffect: entranceEffect, // Store the entrance effect type
     }
 
-    console.log('Created new shape:', newShape)
+    console.log(
+      'ShapesProvider: Created new shape with ID:',
+      newShape.id,
+      'with effect:',
+      entranceEffect
+    )
     setShapes((prev) => [...prev, newShape])
-  }
+  }, [])
 
-  const clearShapes = () => {
-    console.log('Clearing all shapes')
+  const clearShapes = useCallback(() => {
+    console.log('ShapesProvider: Clearing all shapes')
     setShapes([])
-  }
+  }, [])
+
+  // Log every time shapes collection changes
+  useEffect(() => {
+    console.log(
+      'ShapesProvider: Shapes collection updated, now contains:',
+      shapes.length,
+      'shapes'
+    )
+  }, [shapes])
 
   return (
-    <ShapesContext.Provider value={{ shapes, addShape, clearShapes }}>
+    <ShapesContext.Provider
+      value={{ shapes, addShape, clearShapes, setShapes }}
+    >
       {children}
     </ShapesContext.Provider>
   )
@@ -299,6 +465,24 @@ function ShapesControls({
   )
 }
 
+// Helper function to randomly select a material type
+function randomizeMaterial(): string {
+  const materials = ['standard', 'glass', 'metal', 'plastic']
+  const weights = [0.5, 0.2, 0.2, 0.1] // Standard is most common, plastic least common
+
+  const rand = Math.random()
+  let cumulativeWeight = 0
+
+  for (let i = 0; i < materials.length; i++) {
+    cumulativeWeight += weights[i]
+    if (rand < cumulativeWeight) {
+      return materials[i]
+    }
+  }
+
+  return 'standard'
+}
+
 // Main component
 export default function CustomShapes({
   enabled = true,
@@ -307,37 +491,53 @@ export default function CustomShapes({
   uiOnly = false,
   shapesOnly = false,
   onSettingsClick = null,
-}: CustomShapesProps & { onSettingsClick?: (() => void) | null }) {
+}: CustomShapesProps) {
+  // Fix unused variable warnings by only destructuring what we need
+  const { shapes } = useShapes()
+
+  // Add logging to debug shape visibility issues
+  console.log('CustomShapes rendering with:', {
+    enabled,
+    shapesCount: shapes.length,
+    uiOnly,
+    shapesOnly,
+    standalone,
+    shapes: shapes.map((s) => ({
+      id: s.id,
+      pointCount: s.points.length,
+      holes: s.holes?.length || 0,
+      material: s.materialType,
+      position: s.position,
+    })),
+  })
+
   if (!enabled) return null
 
-  // Only render UI controls if uiOnly or standalone is true
+  // Only render the UI elements
   if (uiOnly) {
     return <ShapesControls onSettingsClick={onSettingsClick} />
   }
 
-  // Only render shapes if shapesOnly or standalone is true
+  // Only render the shapes
   if (shapesOnly) {
-    return <ShapesContent speed={speed} />
+    return <ShapesRenderer shapes={shapes} speed={speed} />
   }
 
   // Render both in standalone mode
   if (standalone) {
     return (
       <ShapesProvider>
-        <ShapesContent speed={speed} />
+        <ShapesRenderer shapes={shapes} speed={speed} />
         <ShapesControls onSettingsClick={onSettingsClick} />
       </ShapesProvider>
     )
   }
 
-  return null
-}
-
-// Component to render shapes using context
-function ShapesContent({ speed }: { speed: number }) {
-  const { shapes } = useShapes()
-
-  console.log('ShapesContent rendering with', shapes.length, 'shapes')
-
-  return <ShapesRenderer shapes={shapes} speed={speed} />
+  // Default rendering
+  return (
+    <>
+      <ShapesRenderer shapes={shapes} speed={speed} />
+      <ShapesControls onSettingsClick={onSettingsClick} />
+    </>
+  )
 }
