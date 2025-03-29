@@ -15,6 +15,7 @@ import {
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Text, Point, Points } from '@react-three/drei'
 import * as THREE from 'three'
+import { SectionTitle } from '../ui/SectionTitle'
 
 const skills = {
   languages: [
@@ -134,20 +135,11 @@ export default function SkillsSection() {
   return (
     <section id='skills' className='py-20 md:py-28'>
       <div className='container mx-auto px-4'>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5 }}
-          className='max-w-4xl mx-auto mb-16 text-center'
-        >
-          <h2 className='text-3xl md:text-4xl font-bold mb-6'>
-            Technical <span className='text-gradient'>Skills</span>
-          </h2>
-
-          <p className='text-lg text-muted-foreground'>
-            My proficiency across various technologies and tools.
-          </p>
-        </motion.div>
+        <SectionTitle
+          eyebrow='Expertise'
+          title='Technical Skills'
+          description='My proficiency across various technologies and tools.'
+        />
 
         <div className='grid grid-cols-1 lg:grid-cols-5 gap-8'>
           {/* 3D Skill Cloud (Mobile View) */}

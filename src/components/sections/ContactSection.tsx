@@ -10,6 +10,7 @@ import {
   FiGithub,
   FiSend,
 } from 'react-icons/fi'
+import { SectionTitle } from '../ui/SectionTitle'
 
 export default function ContactSection() {
   const ref = useRef<HTMLDivElement>(null)
@@ -95,21 +96,11 @@ export default function ContactSection() {
   return (
     <section id='contact' className='py-20 md:py-28 bg-muted/20'>
       <div className='container mx-auto px-4'>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5 }}
-          className='max-w-4xl mx-auto mb-16 text-center'
-        >
-          <h2 className='text-3xl md:text-4xl font-bold mb-6'>
-            Get In <span className='text-gradient'>Touch</span>
-          </h2>
-
-          <p className='text-lg text-muted-foreground'>
-            Have a project in mind or want to discuss opportunities? Feel free
-            to reach out!
-          </p>
-        </motion.div>
+        <SectionTitle
+          eyebrow='Connect'
+          title='Get In Touch'
+          description='Have a project in mind or want to discuss opportunities? Feel free to reach out!'
+        />
 
         <div
           ref={ref}

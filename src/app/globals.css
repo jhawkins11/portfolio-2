@@ -131,16 +131,49 @@
 
 @keyframes blob {
   0% {
-    transform: translate(0px, 0px) scale(1);
+    transform: scale(1) translate(0px, 0px);
   }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
+  25% {
+    transform: scale(1.1) translate(-20px, 15px);
   }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
+  50% {
+    transform: scale(1) translate(0px, 0px);
+  }
+  75% {
+    transform: scale(0.9) translate(20px, -15px);
   }
   100% {
-    transform: translate(0px, 0px) scale(1);
+    transform: scale(1) translate(0px, 0px);
+  }
+}
+
+@keyframes floating {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes shimmer-vertical {
+  0% {
+    background-position: 0 -100%;
+  }
+  100% {
+    background-position: 0 200%;
   }
 }
 
@@ -161,7 +194,11 @@
 
 @layer utilities {
   .animate-blob {
-    animation: blob 20s infinite alternate;
+    animation: blob 20s infinite;
+  }
+
+  .animate-floating {
+    animation: floating 8s ease-in-out infinite;
   }
 
   .animate-spin-slow {
@@ -176,8 +213,32 @@
     animation-delay: 4s;
   }
 
+  .animation-delay-6000 {
+    animation-delay: 6s;
+  }
+
   .animate-shine {
     animation: shine 1.2s forwards linear;
+  }
+
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite linear;
+  }
+
+  .animate-shimmer-vertical {
+    background-size: 100% 200%;
+    animation: shimmer-vertical 3s infinite linear;
+  }
+
+  .animate-shimmer-fast {
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+  }
+
+  .animate-shimmer-vertical-fast {
+    background-size: 100% 200%;
+    animation: shimmer-vertical 1.5s infinite linear;
   }
 }
 

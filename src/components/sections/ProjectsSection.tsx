@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { FiExternalLink, FiGithub, FiFolder } from 'react-icons/fi'
+import { SectionTitle } from '../ui/SectionTitle'
 
 const projects = [
   {
@@ -50,20 +51,11 @@ export default function ProjectsSection() {
   return (
     <section id='projects' className='py-20 md:py-28 bg-muted/20'>
       <div className='container mx-auto px-4'>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5 }}
-          className='max-w-4xl mx-auto mb-16 text-center'
-        >
-          <h2 className='text-3xl md:text-4xl font-bold mb-6'>
-            Featured <span className='text-gradient'>Projects</span>
-          </h2>
-
-          <p className='text-lg text-muted-foreground'>
-            Showcasing my best work and technical capabilities.
-          </p>
-        </motion.div>
+        <SectionTitle
+          eyebrow='Portfolio'
+          title='Featured Projects'
+          description='Showcasing my best work and technical capabilities.'
+        />
 
         <motion.div
           ref={ref}
