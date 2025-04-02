@@ -4,17 +4,13 @@ import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import {
   FiCode,
-  FiDatabase,
   FiCloud,
   FiLayers,
   FiServer,
   FiBriefcase,
-  FiBox,
-  FiGitBranch,
 } from 'react-icons/fi'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Text, Point, Points } from '@react-three/drei'
-import * as THREE from 'three'
+import { OrbitControls, Text } from '@react-three/drei'
 import { SectionTitle } from '../ui/SectionTitle'
 
 const skills = {
@@ -161,7 +157,7 @@ export default function SkillsSection() {
             className='col-span-3'
           >
             <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
-              {skillCategories.map((category, catIndex) => (
+              {skillCategories.map((category) => (
                 <motion.div
                   key={category.name}
                   variants={itemVariants}

@@ -60,7 +60,7 @@ export default function AboutSection() {
       setCursorVisible((prev) => !prev)
     }, 500)
 
-    // Type text - completely rewritten for fixed version
+    // Type text
     let timeoutId: NodeJS.Timeout | null = null
 
     const typeNextLine = () => {
@@ -108,7 +108,6 @@ export default function AboutSection() {
     }
 
     // Only trigger the typing effect when the current line changes or when we first come into view
-    // This is a key fix - we were triggering this effect when terminalText changed, causing issues
     const lineChangeEffect = () => {
       // Start typing new line
       if (currentLine < codeLines.length) {
@@ -173,17 +172,15 @@ export default function AboutSection() {
       className='relative py-20 md:py-28 overflow-hidden'
       ref={ref}
     >
-      {/* Enhanced atmospheric background effects */}
       <div className='absolute inset-0'>
-        {/* Primary gradient background */}
         <div className='absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background/90'></div>
 
-        {/* Animated blobs with stronger presence */}
+        {/* Animated blobs  */}
         <div className='absolute top-0 -right-1/4 w-[800px] h-[800px] bg-accent/10 rounded-full blur-[120px] animate-blob'></div>
         <div className='absolute bottom-0 -left-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] animate-blob animation-delay-2000'></div>
         <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-secondary/10 rounded-full blur-[130px] animate-blob animation-delay-4000'></div>
 
-        {/* Enhanced grain texture */}
+        {/* grain texture */}
         <div
           className='absolute inset-0 opacity-30 mix-blend-soft-light'
           style={{

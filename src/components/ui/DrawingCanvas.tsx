@@ -408,15 +408,6 @@ export default function DrawingCanvas({
     const normalizedHoles = processedHoles.map((holePoints) =>
       normalizePointsWithParams(holePoints, { centerX, centerY, size })
     )
-
-    console.log(
-      'Creating shape with',
-      normalizedOuterShape.length,
-      'outer points and',
-      normalizedHoles.length,
-      'holes'
-    )
-
     // Let's create the shape with the selected material
     const shapeWithHoles: ShapeWithHoles = {
       outerShape: normalizedOuterShape,
@@ -424,7 +415,6 @@ export default function DrawingCanvas({
       materialType: materialType,
     }
 
-    console.log('Created shape with material:', materialType)
     onShapeCreated(shapeWithHoles)
 
     // Clear canvas for next drawing

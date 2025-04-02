@@ -129,17 +129,13 @@ export default function ExperienceSection() {
       className='relative py-20 md:py-28 overflow-hidden'
       ref={sectionRef}
     >
-      {/* Enhanced atmospheric background effects */}
       <div className='absolute inset-0'>
-        {/* Primary gradient background */}
         <div className='absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background/90'></div>
 
-        {/* Animated blobs with stronger presence */}
         <div className='absolute top-0 left-1/4 w-[800px] h-[800px] bg-primary/15 rounded-full blur-[120px] animate-blob'></div>
         <div className='absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-accent/15 rounded-full blur-[100px] animate-blob animation-delay-2000'></div>
         <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-secondary/15 rounded-full blur-[130px] animate-blob animation-delay-4000'></div>
 
-        {/* Enhanced grain texture */}
         <div
           className='absolute inset-0 opacity-30 mix-blend-soft-light'
           style={{
@@ -150,7 +146,6 @@ export default function ExperienceSection() {
       </div>
 
       <div className='container mx-auto px-4 relative'>
-        {/* Subtle section divider */}
         <div className='absolute top-0 left-1/2 transform -translate-x-1/2 w-[120%] h-[1px] bg-gradient-to-r from-transparent via-border/30 to-transparent'></div>
 
         <SectionTitle
@@ -160,7 +155,6 @@ export default function ExperienceSection() {
         />
 
         <div ref={timelineRef} className='max-w-[1400px] mx-auto relative'>
-          {/* Timeline line with enhanced gradient effect - positioned on the left */}
           <div className='absolute left-0 sm:left-[80px] md:left-[120px] lg:left-[160px] top-0 bottom-0 w-[3px]'>
             <div className='absolute inset-0 bg-gradient-to-b from-border/5 via-border/20 to-border/5 rounded-full'></div>
             <div
@@ -185,9 +179,7 @@ export default function ExperienceSection() {
               transition={{ duration: 0.6, delay: index * 0.2 }}
               className='mb-24 relative'
             >
-              {/* Timeline node with enhanced pulse effect - positioned on the left */}
               <div className='absolute left-[-9px] sm:left-[71px] md:left-[111px] lg:left-[151px] top-12 z-10'>
-                {/* Outer pulse effect */}
                 <motion.div
                   className='w-[36px] h-[36px] rounded-full bg-primary/10 backdrop-blur-sm absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
                   initial={{ scale: 1, opacity: 0.2 }}
@@ -198,7 +190,6 @@ export default function ExperienceSection() {
                     ease: 'easeInOut',
                   }}
                 />
-                {/* Middle pulse effect */}
                 <motion.div
                   className='w-[26px] h-[26px] rounded-full bg-primary/20 backdrop-blur-sm absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
                   initial={{ scale: 1, opacity: 0.4 }}
@@ -210,15 +201,11 @@ export default function ExperienceSection() {
                     delay: 0.2,
                   }}
                 />
-                {/* Core node */}
                 <div className='w-[20px] h-[20px] rounded-full bg-gradient-to-tr from-primary to-primary/90 shadow-lg shadow-primary/25 relative'></div>
               </div>
 
-              {/* Content container - shifted right of timeline */}
               <div className='ml-8 sm:ml-[120px] md:ml-[180px] lg:ml-[240px]'>
-                {/* Experience header - Left aligned */}
                 <div className='mb-5'>
-                  {/* Date badge floating to the right */}
                   <div className='flex justify-between items-start mb-2'>
                     <h3 className='text-xl md:text-2xl lg:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/90'>
                       {experience.title}
@@ -332,7 +319,7 @@ export default function ExperienceSection() {
                           key={i}
                           className='border border-border/30 rounded-xl p-4 transition-all duration-500 bg-card/20 backdrop-blur-sm group/achievement h-full relative overflow-hidden will-change-transform hover:border-border/10 hover:-translate-y-[2px]'
                         >
-                          {/* Premium subtle hover effect */}
+                          {/*  subtle hover effect */}
                           <div className='absolute inset-0 opacity-0 group-hover/achievement:opacity-100 transition-all duration-400'>
                             {/* Top gradient border effect */}
                             <div className='absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent transform origin-left scale-x-0 group-hover/achievement:scale-x-100 transition-transform duration-500'></div>
@@ -344,7 +331,6 @@ export default function ExperienceSection() {
                             <div className='absolute inset-0 rounded-xl shadow-[inset_0_0_20px_rgba(var(--primary-rgb),0.03)] opacity-0 group-hover/achievement:opacity-100 transition-opacity duration-500'></div>
                           </div>
 
-                          {/* Content with refined animation */}
                           <div className='relative z-1 h-full transition-all duration-300 ease-out group-hover/achievement:scale-[1.01] origin-bottom-left'>
                             <h4 className='font-semibold text-foreground/90 group-hover/achievement:text-foreground text-sm md:text-base transition-colors duration-300 mb-3'>
                               {item.highlight}
@@ -355,7 +341,6 @@ export default function ExperienceSection() {
                             </p>
                           </div>
 
-                          {/* Premium hover state enhancement */}
                           <div className='absolute inset-0 rounded-xl shadow-lg shadow-primary/5 opacity-0 group-hover/achievement:opacity-100 transition-opacity duration-500 pointer-events-none'></div>
                         </div>
                       )
@@ -368,7 +353,6 @@ export default function ExperienceSection() {
         </div>
       </div>
 
-      {/* Subtle decorative elements at the bottom of the section */}
       <div className='absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background/5 to-transparent'></div>
       <div className='absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[120%] h-[1px] bg-gradient-to-r from-transparent via-border/30 to-transparent'></div>
     </section>

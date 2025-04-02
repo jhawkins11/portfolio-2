@@ -40,11 +40,9 @@ export default function ContactSection() {
     setSubmitError('')
 
     try {
-      // In a real application, you would send the form data to your backend or a form service
-      // For demo purposes, we'll simulate a successful submission after a delay
+      // TODO: Send form data to backend
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      // Example response validation
       if (formData.email && formData.name && formData.message) {
         setSubmitSuccess(true)
         setFormData({ name: '', email: '', subject: '', message: '' })

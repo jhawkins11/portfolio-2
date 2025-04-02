@@ -28,10 +28,6 @@ export default function DrawingCanvasPortal({
   isOpen,
 }: DrawingCanvasPortalProps) {
   const [isMounted, setIsMounted] = useState(false)
-
-  // Log portal state
-  console.log('DrawingCanvasPortal rendering with isOpen:', isOpen)
-
   useEffect(() => {
     setIsMounted(true)
     return () => {
@@ -55,16 +51,7 @@ export default function DrawingCanvasPortal({
       'holes' in data
 
     if (isShapeWithHoles(shapeData)) {
-      console.log('DrawingCanvasPortal: Complex shape created with', {
-        outerPoints: shapeData.outerShape.length,
-        holes: shapeData.holes.length,
-        material: shapeData.materialType,
-      })
-
       if (shapeData.outerShape.length >= 3) {
-        console.log(
-          'DrawingCanvasPortal: Passing valid complex shape to parent handler'
-        )
         onShapeCreated(shapeData)
         onClose()
       } else {
@@ -73,14 +60,6 @@ export default function DrawingCanvasPortal({
         )
       }
     } else if (Array.isArray(shapeData) && shapeData.length >= 3) {
-      console.log(
-        'DrawingCanvasPortal: Simple shape created with',
-        shapeData.length,
-        'points'
-      )
-      console.log(
-        'DrawingCanvasPortal: Passing valid simple shape to parent handler'
-      )
       onShapeCreated(shapeData)
       onClose()
     } else {

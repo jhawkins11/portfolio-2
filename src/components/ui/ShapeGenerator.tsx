@@ -121,17 +121,6 @@ export default function ShapeGenerator({
 
   // Generate the geometry based on shape analysis
   const geometry = useMemo(() => {
-    console.log(
-      'Generating geometry for',
-      shapeType,
-      'from',
-      points.length,
-      'points',
-      'with',
-      holes.length,
-      'holes'
-    )
-
     if (!points || points.length < 3) {
       console.error('Cannot create shape: not enough points', points)
       return null
@@ -147,13 +136,13 @@ export default function ShapeGenerator({
       ) {
         // Create a proper 3D sphere for glass material
         const sphereGeometry = new THREE.SphereGeometry(
-          radius * 0.35, // Scale down the radius to match the scale we apply later
-          48, // width segments (more segments = smoother sphere)
-          48, // height segments (increased for better vertical resolution)
-          0, // phiStart
-          Math.PI * 2, // phiLength (full 360 degrees)
-          0, // thetaStart
-          Math.PI // thetaLength (full 180 degrees)
+          radius * 0.35,
+          48,
+          48,
+          0,
+          Math.PI * 2,
+          0,
+          Math.PI
         )
 
         return sphereGeometry
@@ -195,13 +184,13 @@ export default function ShapeGenerator({
         // create a more "spherical" extrusion with higher depth
         extrudeSettings = {
           steps: 2,
-          depth: height * 2.5, // Much higher depth to approach sphere
+          depth: height * 2.5,
           bevelEnabled: true,
-          bevelThickness: 0.35, // Significant bevel
-          bevelSize: 0.4, // Larger bevel size
-          bevelSegments: 10, // More segments for smoother edges
+          bevelThickness: 0.35,
+          bevelSize: 0.4,
+          bevelSegments: 10,
           bevelOffset: 0,
-          curveSegments: 32, // Higher resolution curves
+          curveSegments: 32,
         }
       } else if (holes.length > 0) {
         // Special settings for shapes with holes to ensure they cut all the way through
@@ -249,12 +238,12 @@ export default function ShapeGenerator({
         color: new THREE.Color(color),
         metalness: 0.1,
         roughness: 0.05,
-        transmission: 0.9, // High transmission for glass
-        thickness: 0.5, // Glass thickness
+        transmission: 0.9,
+        thickness: 0.5,
         clearcoat: 1.0,
         clearcoatRoughness: 0.1,
         envMapIntensity: 1,
-        ior: 1.5, // Index of refraction for glass
+        ior: 1.5,
         transparent: true,
         opacity: 0.8,
         side: THREE.DoubleSide,
@@ -365,7 +354,7 @@ export default function ShapeGenerator({
           // More interesting bobbing motion
           meshRef.current.position.y =
             position[1] + Math.sin(state.clock.elapsedTime * 0.5 * speed) * 0.2
-          // Add slight horizontal movement for more dynamic feel
+          // slight horizontal movement
           meshRef.current.position.x =
             position[0] + Math.cos(state.clock.elapsedTime * 0.3 * speed) * 0.15
         } else {

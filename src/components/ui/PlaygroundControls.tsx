@@ -109,7 +109,7 @@ const ColorPickerWrapper = memo(
           if (/^#([0-9A-F]{3}){1,2}$/i.test(newColor)) {
             onChange(newColor)
           }
-        }, 100) // 100ms debounce
+        }, 100)
       },
       [onChange]
     )
@@ -169,7 +169,6 @@ export default function PlaygroundControls({
 
   // Sync visibility with parent component
   useEffect(() => {
-    console.log('PlaygroundControls: isVisible prop changed to', isVisible)
     setVisible(isVisible)
 
     // When the panel becomes visible again, sync settings with latest from parent

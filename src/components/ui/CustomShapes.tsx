@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  useState,
-  createContext,
-  useContext,
-  useCallback,
-  useEffect,
-} from 'react'
+import { useState, createContext, useContext, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { FiPlus, FiTool } from 'react-icons/fi'
 import { useFrame } from '@react-three/fiber'
@@ -207,9 +201,6 @@ const getShapePosition = (): [number, number, number] => {
   // Mark this position as used
   usedPositionIndices.push(selectedIndex)
 
-  console.log(
-    `Using position at index ${selectedIndex}: ${predefinedPositions[selectedIndex]}`
-  )
   return predefinedPositions[selectedIndex]
 }
 
@@ -222,7 +213,6 @@ function ShapesRenderer({
   speed: number
 }) {
   const { setShapes } = useContext(ShapesContext)
-  console.log('Rendering ShapesRenderer with', shapes.length, 'shapes')
 
   // Add animation logic for shapes entrance
   useFrame((state) => {
@@ -293,12 +283,6 @@ export function ShapesProvider({ children }: { children: React.ReactNode }) {
     let materialType: string | undefined
 
     if (isShapeWithHoles(shapeData)) {
-      console.log(
-        'ShapesProvider: Adding complex shape with',
-        shapeData.holes.length,
-        'holes and material',
-        shapeData.materialType
-      )
       points = shapeData.outerShape
       holes = shapeData.holes
       materialType = shapeData.materialType
@@ -308,11 +292,6 @@ export function ShapesProvider({ children }: { children: React.ReactNode }) {
         return
       }
     } else {
-      console.log(
-        'ShapesProvider: Adding simple shape with',
-        shapeData.length,
-        'points'
-      )
       points = shapeData
       materialType = undefined
 
@@ -341,28 +320,12 @@ export function ShapesProvider({ children }: { children: React.ReactNode }) {
       entranceEffect: entranceEffect, // Store the entrance effect type
     }
 
-    console.log(
-      'ShapesProvider: Created new shape with ID:',
-      newShape.id,
-      'with effect:',
-      entranceEffect
-    )
     setShapes((prev) => [...prev, newShape])
   }, [])
 
   const clearShapes = useCallback(() => {
-    console.log('ShapesProvider: Clearing all shapes')
     setShapes([])
   }, [])
-
-  // Log every time shapes collection changes
-  useEffect(() => {
-    console.log(
-      'ShapesProvider: Shapes collection updated, now contains:',
-      shapes.length,
-      'shapes'
-    )
-  }, [shapes])
 
   return (
     <ShapesContext.Provider
@@ -388,8 +351,6 @@ function ShapesControls({
   const [showDrawingCanvas, setShowDrawingCanvas] = useState(false)
 
   const handleShapeCreated = (shapeData: Point[] | ShapeWithHoles) => {
-    console.log('ShapesControls received shape data')
-
     // Validate shape data
     const isShapeWithHoles = (data: unknown): data is ShapeWithHoles =>
       data !== null &&
@@ -494,22 +455,6 @@ export default function CustomShapes({
 }: CustomShapesProps) {
   // Fix unused variable warnings by only destructuring what we need
   const { shapes } = useShapes()
-
-  // Add logging to debug shape visibility issues
-  console.log('CustomShapes rendering with:', {
-    enabled,
-    shapesCount: shapes.length,
-    uiOnly,
-    shapesOnly,
-    standalone,
-    shapes: shapes.map((s) => ({
-      id: s.id,
-      pointCount: s.points.length,
-      holes: s.holes?.length || 0,
-      material: s.materialType,
-      position: s.position,
-    })),
-  })
 
   if (!enabled) return null
 

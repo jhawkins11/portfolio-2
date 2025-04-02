@@ -22,7 +22,6 @@ const projects = [
       'Integrated authentication using Firebase Auth',
     ],
   },
-  // You can add more projects here
 ]
 
 export default function ProjectsSection() {
@@ -147,7 +146,6 @@ export default function ProjectsSection() {
           ))}
         </motion.div>
 
-        {/* Add a "View More" button if you have more projects */}
         {projects.length > 3 && (
           <motion.div
             initial={{ opacity: 0 }}

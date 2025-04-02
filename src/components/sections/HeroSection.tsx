@@ -53,13 +53,14 @@ const AnimatedSphere = ({
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
       <Sphere
-        args={[1.4, 128, 128]} // Original size for larger screens
+        args={[1.4, 128, 128]}
         ref={meshRef}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         scale={
+          // Scale down only on smaller screens
           typeof window !== 'undefined' && window.innerWidth < 768 ? 0.85 : 1
-        } // Scale down only on smaller screens
+        }
       >
         <MeshDistortMaterial
           color={color}
@@ -184,17 +185,6 @@ export default function HeroSection() {
   const [playgroundSettings, setPlaygroundSettings] =
     useState<PlaygroundSettings>(DEFAULT_PLAYGROUND_SETTINGS)
 
-  // Add logging effect to monitor custom shapes settings
-  useEffect(() => {
-    console.log(
-      'HeroSection: Current playgroundSettings.customShapes:',
-      playgroundSettings.customShapes
-    )
-  }, [
-    playgroundSettings.customShapes.enabled,
-    playgroundSettings.customShapes.speed,
-  ])
-
   // Replace the tutorial state with playground mode state
   const [playgroundMode, setPlaygroundMode] = useState(false)
   const [showControlPanel, setShowControlPanel] = useState(false)
@@ -271,22 +261,18 @@ export default function HeroSection() {
           return prevSettings
         })
 
-        // When settings are changed, make sure we don't reset on next open
         setShouldResetOnNextOpen(false)
-      }, 50) // Short delay to debounce rapid updates
+      }, 50)
     },
     []
   )
 
-  // Reset playground settings to defaults
   const resetPlaygroundSettings = useCallback(() => {
     setPlaygroundSettings({ ...DEFAULT_PLAYGROUND_SETTINGS })
   }, [])
 
-  // Open controls with default tab
   const openControls = useCallback(
     (tab: string | null = null) => {
-      // Check if we need to reset settings
       if (shouldResetOnNextOpen) {
         resetPlaygroundSettings()
         setShouldResetOnNextOpen(false)
@@ -311,7 +297,6 @@ export default function HeroSection() {
     [shouldResetOnNextOpen, resetPlaygroundSettings]
   )
 
-  // Handle closing controls
   const closeControls = useCallback(() => {
     setShowControlPanel(false)
     setActiveControlPoint(null)
@@ -330,22 +315,6 @@ export default function HeroSection() {
     }),
   }
 
-  // Add effect to log CustomShapes settings when they change
-  useEffect(() => {
-    if (playgroundSettings.customShapes.enabled) {
-      console.log('HeroSection: CustomShapes settings:', {
-        enabled: playgroundSettings.customShapes.enabled,
-        speed:
-          playgroundSettings.customShapes.speed *
-          playgroundSettings.animation.speed,
-      })
-    }
-  }, [
-    playgroundSettings.customShapes.enabled,
-    playgroundSettings.customShapes.speed,
-    playgroundSettings.animation.speed,
-  ])
-
   return (
     <ShapesProvider>
       <section
@@ -353,7 +322,7 @@ export default function HeroSection() {
         className='min-h-screen relative overflow-hidden flex items-center justify-center hero-section pt-12 sm:pt-16'
         ref={containerRef}
       >
-        {/* Background Blobs - Enhanced sizes and positions */}
+        {/* Background Blobs */}
         <div
           className='blob bg-primary/30 w-[600px] sm:w-[800px] h-[600px] sm:h-[800px] -top-48 -left-24 blur-3xl opacity-70'
           style={{
@@ -376,13 +345,11 @@ export default function HeroSection() {
           }}
         ></div>
 
-        {/* Background grid with stronger presence */}
         <div className='absolute inset-0 bg-grid-pattern pointer-events-none'></div>
 
-        {/* Add noise texture for more organic feel */}
         <div className='bg-noise absolute inset-0 pointer-events-none'></div>
 
-        {/* Floating particles for depth - moved down in the DOM for proper z-index layering */}
+        {/* Floating particles */}
         <div className='bg-particles absolute inset-0 z-1000'>
           <div className='particle'></div>
           <div className='particle'></div>
@@ -588,14 +555,14 @@ export default function HeroSection() {
             </motion.div>
           </motion.div>
 
-          {/* 3D Element Container - Keep original size for 3D elements */}
+          {/* 3D Element Container */}
           <motion.div
             className='h-[320px] sm:h-[380px] md:h-[450px] lg:h-[550px] w-full md:w-1/2 relative mt-6 md:mt-0'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 1 }}
           >
-            {/* Enhanced 3D Scene - Adjusted to properly display all elements */}
+            {/* Enhanced 3D Scene */}
             <motion.div
               style={{
                 transform: `perspective(2000px) rotateX(${
@@ -640,7 +607,7 @@ export default function HeroSection() {
                 />
               </Canvas>
 
-              {/* Controls for CustomShapes with pointer events enabled */}
+              {/* Controls for CustomShapes */}
               {playgroundSettings.customShapes.enabled && (
                 <div className='absolute inset-0 z-[450]'>
                   <CustomShapes
@@ -676,7 +643,7 @@ export default function HeroSection() {
                 ></div>
               ))}
 
-              {/* Profile Image with better integration with the sphere */}
+              {/* Profile Image */}
               <motion.div
                 className='absolute z-20 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none'
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -692,7 +659,6 @@ export default function HeroSection() {
                     priority
                     className='rounded-full'
                   />
-                  {/* Add gradient overlay to match sphere colors */}
                   <div className='absolute inset-0 bg-gradient-to-tr from-primary/30 via-transparent to-accent/20 mix-blend-overlay'></div>
                 </div>
                 {/* Enhanced glowing effect */}
@@ -700,7 +666,7 @@ export default function HeroSection() {
               </motion.div>
             </motion.div>
 
-            {/* Updated code snippets with better positioning, smaller text and less prominence */}
+            {/* Code snippets */}
             <motion.div
               className='absolute top-4 sm:top-8 md:top-12 right-0 sm:right-2 md:right-4 lg:right-12 bg-background/85 backdrop-blur-md px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-white/10 shadow-xl transform rotate-2 z-30 max-w-[120px] sm:max-w-[140px] md:max-w-[160px] lg:max-w-[200px]'
               initial={{ opacity: 0, x: 20 }}
@@ -762,7 +728,7 @@ function createImpact() {
           </div>
         </motion.div>
 
-        {/* Playground Mode UI - Only show the settings button if CustomShapes is not enabled */}
+        {/* Playground Mode UI */}
         <AnimatePresence>
           {!showControlPanel &&
             playgroundMode &&
@@ -845,7 +811,7 @@ function createImpact() {
             )}
         </AnimatePresence>
 
-        {/* Controls Panel - Ensure we're correctly handling the visibility state */}
+        {/* Controls Panel */}
         {playgroundMode && (
           <PlaygroundControls
             initialSettings={playgroundSettings}
