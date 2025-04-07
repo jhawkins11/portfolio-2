@@ -292,10 +292,13 @@ code {
 
 pre {
   background-color: rgba(var(--muted-rgb), 0.3);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
+  border-radius: 0.75rem;
+  padding: 1rem;
   box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(var(--muted-foreground-rgb), 0.1);
+  white-space: pre;
+  overflow-wrap: break-word;
+  overflow-x: auto;
 }
 
 :not(pre) > code {

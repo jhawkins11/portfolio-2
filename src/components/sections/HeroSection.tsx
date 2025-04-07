@@ -85,69 +85,99 @@ type FloatingObjectsProps = {
 const FloatingObjects = ({
   visible = true,
   speed = 1.0,
-}: FloatingObjectsProps) => {
+  cursorPos = { x: 0, y: 0 },
+}: FloatingObjectsProps & { cursorPos?: { x: number; y: number } }) => {
   if (!visible) return null
+
+  // Calculate subtle magnetic effect based on cursor position
+  const getMagneticOffset = (
+    basePos: [number, number, number],
+    factor: number
+  ): [number, number, number] => {
+    const magneticStrength = 0.15 // Strength of the magnetic effect
+    const xOffset = cursorPos.x * magneticStrength * factor
+    const yOffset = cursorPos.y * magneticStrength * factor
+    return [basePos[0] + xOffset, basePos[1] + yOffset, basePos[2]]
+  }
 
   return (
     <>
       <Float
-        position={[-1.5, -1.2, 0]}
+        position={getMagneticOffset([-1.7, -0.5, -0.2], -1)} // Moves away from cursor
         speed={1.5 * speed}
         rotationIntensity={1.5 * speed}
         floatIntensity={0.8 * speed}
       >
         <mesh>
-          <octahedronGeometry args={[0.5, 0]} />{' '}
-          {/* Smaller size for better fit */}
+          <octahedronGeometry args={[0.5, 0]} />
           <meshStandardMaterial
             color='#FB7185'
             wireframe
             roughness={0.1}
             metalness={0.8}
             emissive='#b91c1c'
-            emissiveIntensity={0.3}
+            emissiveIntensity={0.3 + Math.abs(cursorPos.x * 0.1)} // Slightly modulate emissive intensity with cursor
           />
         </mesh>
       </Float>
 
       <Float
-        position={[1.5, 0.3, -0.5]}
+        position={getMagneticOffset([1.5, 0.3, -0.5], 1)} // Moves toward cursor
         speed={2 * speed}
         rotationIntensity={1 * speed}
         floatIntensity={0.5 * speed}
       >
         <mesh>
-          <torusGeometry args={[0.4, 0.2, 16, 32]} />{' '}
-          {/* Smaller size for better fit */}
+          <torusGeometry args={[0.35, 0.18, 16, 32]} />
           <meshStandardMaterial
             color='#6EE7B7'
             roughness={0.3}
             metalness={0.7}
             emissive='#047857'
-            emissiveIntensity={0.3}
+            emissiveIntensity={0.3 + Math.abs(cursorPos.y * 0.1)} // Slightly modulate emissive intensity with cursor
           />
         </mesh>
       </Float>
 
       <Float
-        position={[0, 1.5, -0.3]}
+        position={getMagneticOffset([0, 1.5, -0.3], 0.7)} // Subtle attraction to cursor
         speed={1.2 * speed}
         rotationIntensity={0.8 * speed}
         floatIntensity={0.7 * speed}
       >
         <mesh>
-          <dodecahedronGeometry args={[0.5, 0]} />{' '}
-          {/* Smaller size for better fit */}
+          <dodecahedronGeometry args={[0.5, 0]} />
           <meshStandardMaterial
             color='#FDE68A'
             roughness={0.5}
             metalness={0.6}
             emissive='#a16207'
-            emissiveIntensity={0.3}
+            emissiveIntensity={
+              0.3 + Math.abs((cursorPos.x + cursorPos.y) * 0.05)
+            } // Combined coordinates effect
           />
         </mesh>
       </Float>
     </>
+  )
+}
+
+// Create a new component for the cursor-following spotlight
+const MouseLight = ({ cursorPos }: { cursorPos: { x: number; y: number } }) => {
+  // Map cursor position to a reasonable range for the spotlight
+  const lightX = cursorPos.x * 5
+  const lightY = cursorPos.y * 5
+
+  return (
+    <spotLight
+      position={[lightX, lightY, 4]}
+      intensity={0.8}
+      angle={0.5}
+      penumbra={0.8}
+      color='#ffffff'
+      castShadow
+      distance={10}
+    />
   )
 }
 
@@ -180,6 +210,7 @@ const DEFAULT_PLAYGROUND_SETTINGS: PlaygroundSettings = {
 
 export default function HeroSection() {
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
+  const targetCursorPos = useRef({ x: 0, y: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [playgroundSettings, setPlaygroundSettings] =
@@ -201,15 +232,33 @@ export default function HeroSection() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setCursorPos({
+      // Store raw cursor position in ref for smooth interpolation
+      targetCursorPos.current = {
         x: (e.clientX / window.innerWidth) * 2 - 1,
         y: -(e.clientY / window.innerHeight) * 2 + 1,
-      })
+      }
     }
 
     window.addEventListener('mousemove', handleMouseMove)
+
+    // Set up an animation frame to smoothly update the cursor position
+    let animationFrameId: number
+
+    const updateCursorPos = () => {
+      // Smoothly interpolate current cursor position towards target
+      setCursorPos((prev) => ({
+        x: prev.x + (targetCursorPos.current.x - prev.x) * 0.05,
+        y: prev.y + (targetCursorPos.current.y - prev.y) * 0.05,
+      }))
+
+      animationFrameId = requestAnimationFrame(updateCursorPos)
+    }
+
+    updateCursorPos()
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
+      cancelAnimationFrame(animationFrameId)
     }
   }, [])
 
@@ -566,30 +615,32 @@ export default function HeroSection() {
             <motion.div
               style={{
                 transform: `perspective(2000px) rotateX(${
-                  cursorPos.y * 3 * playgroundSettings.animation.speed
+                  cursorPos.y * 2 * playgroundSettings.animation.speed
                 }deg) rotateY(${
-                  -cursorPos.x * 3 * playgroundSettings.animation.speed
+                  -cursorPos.x * 2 * playgroundSettings.animation.speed
                 }deg)`,
               }}
               className='relative h-full w-full z-10'
             >
               <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-                <ambientLight intensity={0.6} />
-                <directionalLight position={[10, 10, 5]} intensity={1.5} />
-                <spotLight
-                  position={[-10, -10, -5]}
-                  intensity={1}
-                  angle={0.4}
-                  penumbra={1}
-                />
+                <ambientLight intensity={0.4} />{' '}
+                <directionalLight position={[10, 10, 5]} intensity={1.2} />
+                <MouseLight cursorPos={cursorPos} />
                 <group
                   position={[0, 0, 0]}
-                  rotation={[0, cursorPos.x * 0.2, cursorPos.y * 0.2]}
+                  rotation={[
+                    cursorPos.y * 0.1,
+                    cursorPos.x * 0.1,
+                    cursorPos.x * cursorPos.y * 0.03, // Add subtle twist based on both axes
+                  ]}
                 >
                   <AnimatedSphere
                     color={playgroundSettings.sphere.color}
                     emissive={playgroundSettings.sphere.emissive}
-                    distort={playgroundSettings.sphere.distort}
+                    distort={
+                      playgroundSettings.sphere.distort +
+                      Math.abs(cursorPos.x * 0.05)
+                    }
                     speed={
                       playgroundSettings.sphere.speed *
                       playgroundSettings.animation.speed
@@ -598,12 +649,14 @@ export default function HeroSection() {
                     metalness={playgroundSettings.sphere.metalness}
                   />
                 </group>
+                {/* Pass cursor position to FloatingObjects */}
                 <FloatingObjects
                   visible={playgroundSettings.floatingObjects.visible}
                   speed={
                     playgroundSettings.floatingObjects.speed *
                     playgroundSettings.animation.speed
                   }
+                  cursorPos={cursorPos}
                 />
               </Canvas>
 
@@ -622,23 +675,40 @@ export default function HeroSection() {
                 </div>
               )}
 
-              {/* Enhanced decorative elements */}
-              <div className='absolute -top-10 right-10 sm:right-20 w-32 sm:w-40 h-32 sm:h-40 bg-secondary/20 rounded-full blur-3xl animate-pulse-slow'></div>
-              <div className='absolute -bottom-10 sm:-bottom-20 left-10 sm:left-20 w-40 sm:w-60 h-40 sm:h-60 bg-primary/20 rounded-full blur-3xl animate-pulse-slow animation-delay-2000'></div>
+              {/* Enhanced decorative elements - add subtle animation with cursor */}
+              <div
+                className='absolute -top-10 right-10 sm:right-20 w-32 sm:w-40 h-32 sm:h-40 bg-secondary/20 rounded-full blur-3xl animate-pulse-slow'
+                style={{
+                  transform: `translate(${cursorPos.x * 5}px, ${
+                    -cursorPos.y * 5
+                  }px)`,
+                  transition: 'transform 0.3s ease-out',
+                }}
+              ></div>
+              <div
+                className='absolute -bottom-10 sm:-bottom-20 left-10 sm:left-20 w-40 sm:w-60 h-40 sm:h-60 bg-primary/20 rounded-full blur-3xl animate-pulse-slow animation-delay-2000'
+                style={{
+                  transform: `translate(${-cursorPos.x * 8}px, ${
+                    cursorPos.y * 8
+                  }px)`,
+                  transition: 'transform 0.3s ease-out',
+                }}
+              ></div>
 
-              {/* Concentric circles with gradient borders - adjusted for smaller screens */}
+              {/* Concentric circles with cursor reactivity */}
               {[300, 240, 180].map((size, i) => (
                 <div
                   key={size}
                   className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border rounded-full animate-spin-slow'
                   style={{
-                    width: size,
-                    height: size,
+                    width: size + cursorPos.x * 10 * (i + 1), // Expand/contract based on cursor
+                    height: size + cursorPos.y * 10 * (i + 1),
                     borderColor: `rgba(var(--primary-rgb), ${0.05 + i * 0.03})`,
                     animationDelay: `${i * 2}s`,
                     animationDuration: `${
                       12 / playgroundSettings.animation.speed
                     }s`,
+                    transition: 'width 0.5s ease-out, height 0.5s ease-out',
                   }}
                 ></div>
               ))}
@@ -650,7 +720,7 @@ export default function HeroSection() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.6, duration: 0.8, ease: 'easeOut' }}
               >
-                <div className='relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl'>
+                <div className='relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl'>
                   <Image
                     src='/images/profile-pic.png'
                     alt='Josiah Hawkins'
@@ -662,42 +732,109 @@ export default function HeroSection() {
                   <div className='absolute inset-0 bg-gradient-to-tr from-primary/30 via-transparent to-accent/20 mix-blend-overlay'></div>
                 </div>
                 {/* Enhanced glowing effect */}
-                <div className='absolute -inset-3 rounded-full bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 animate-spin-slow opacity-70 blur-md'></div>
+                <div className='absolute -inset-2 sm:-inset-3 rounded-full bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 animate-spin-slow opacity-70 blur-md'></div>
               </motion.div>
             </motion.div>
 
             {/* Code snippets */}
+            {/* Code Snippet 1: Skills */}
             <motion.div
-              className='absolute top-4 sm:top-8 md:top-12 right-0 sm:right-2 md:right-4 lg:right-12 bg-background/85 backdrop-blur-md px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-white/10 shadow-xl transform rotate-2 z-30 max-w-[120px] sm:max-w-[140px] md:max-w-[160px] lg:max-w-[200px]'
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
+              className='absolute top-6 sm:top-12 md:top-16 lg:top-20 -right-14 sm:-right-10 md:right-2 lg:right-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(124,58,237,0.15)] hover:shadow-[0_0_25px_rgba(124,58,237,0.25)] transform rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
+              aria-hidden='true'
+              initial={{ opacity: 0, x: 50, rotate: 5 }}
+              animate={{
+                opacity: 1,
+                x: 0,
+                rotate: 2,
+              }}
+              transition={{
+                delay: 0.8,
+                duration: 0.6,
+                ease: 'easeOut',
+              }}
+              whileHover={{
+                y: -3,
+                scale: 1.02,
+                transition: { duration: 0.05, ease: 'easeInOut' },
+              }}
               style={{
-                boxShadow:
-                  '0 8px 20px -10px rgba(var(--primary-rgb), 0.15), 0 3px 5px -2px rgba(0, 0, 0, 0.05)',
+                transition: 'all 0.05s ease',
               }}
             >
-              <pre className='text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs text-foreground/80 font-mono whitespace-pre-wrap'>
-                {`const skills = ['React', 'Next.js', 'AWS'];
-const passion = 'Building amazing apps';`}
+              {/* Simplified code display */}
+              <pre className='text-[9px] sm:text-[10px] font-mono leading-tight overflow-hidden px-5 sm:px-6 py-3 sm:py-4'>
+                <code className='text-gray-300 block'>
+                  <span className='text-[#ff79c6]'>const</span>{' '}
+                  <span className='text-[#bd93f9]'>skills</span>:{' '}
+                  <span className='text-[#f1fa8c]'>string[]</span> = [ <br />
+                  {'  '}
+                  <span className='text-[#50fa7b]'>
+                    &apos;React&apos;
+                  </span>,{' '}
+                  <span className='text-[#50fa7b]'>&apos;Next.js&apos;</span>,{' '}
+                  <br />
+                  {'  '}
+                  <span className='text-[#50fa7b]'>&apos;TypeScript&apos;</span>
+                  , <span className='text-[#50fa7b]'>&apos;AWS&apos;</span>{' '}
+                  <br />
+                  ]; <br />
+                  <span className='text-[#ff79c6]'>const</span>{' '}
+                  <span className='text-[#bd93f9]'>passion</span> = <br />
+                  {'  '}
+                  <span className='text-[#50fa7b]'>
+                    &apos;Building scalable apps&apos;
+                  </span>
+                  ;
+                </code>
               </pre>
             </motion.div>
 
+            {/* Code Snippet 2: Experience */}
             <motion.div
-              className='absolute bottom-4 sm:bottom-8 md:bottom-16 lg:bottom-24 left-0 sm:left-2 md:left-4 lg:left-12 bg-background/85 backdrop-blur-md px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-white/10 shadow-xl transform -rotate-3 z-30 max-w-[120px] sm:max-w-[140px] md:max-w-[160px] lg:max-w-[200px]'
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1, duration: 0.5 }}
+              className='absolute -bottom-14 sm:-bottom-10 md:-bottom-6 lg:bottom-4 -left-14 sm:-left-10 md:left-2 lg:left-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(56,189,248,0.15)] hover:shadow-[0_0_25px_rgba(56,189,248,0.25)] transform -rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
+              aria-hidden='true'
+              initial={{ opacity: 0, x: -50, rotate: -5 }}
+              animate={{
+                opacity: 1,
+                x: 0,
+                rotate: -2,
+              }}
+              transition={{
+                delay: 1,
+                duration: 0.6,
+                ease: 'easeOut',
+              }}
+              whileHover={{
+                y: -3,
+                scale: 1.02,
+                transition: { duration: 0.05, ease: 'easeInOut' },
+              }}
               style={{
-                boxShadow:
-                  '0 8px 20px -10px rgba(var(--accent-rgb), 0.15), 0 3px 5px -2px rgba(0, 0, 0, 0.05)',
+                transition: 'all 0.05s ease',
               }}
             >
-              <pre className='text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs text-foreground/80 font-mono whitespace-pre-wrap'>
-                {`// 3+ years of full stack experience
-function createImpact() {
-  return 'Exceptional digital solutions';
-}`}
+              {/* Simplified code display */}
+              <pre className='text-[9px] sm:text-[10px] font-mono leading-tight overflow-hidden px-5 sm:px-6 py-3 sm:py-4'>
+                <code className='text-gray-300 block'>
+                  {`// 4+ years exp`} <br />
+                  <span className='text-[#8be9fd]'>function</span>{' '}
+                  <span className='text-[#f1fa8c]'>createImpact</span>( <br />
+                  {'  '}
+                  <span className='text-[#ffb86c]'>options</span>:{' '}
+                  <span className='text-[#8be9fd]'>Config</span> <br />) {'{'}{' '}
+                  <br />
+                  {'  '}
+                  <span className='text-[#ff79c6]'>return</span>{' '}
+                  <span className='text-[#50fa7b]'>transforms</span>.
+                  <span className='text-[#8be9fd]'>digital</span>( <br />
+                  {'    '}
+                  <span className='text-[#50fa7b]'>
+                    &apos;solutions&apos;
+                  </span>{' '}
+                  <br />
+                  {'  '}); <br />
+                  {'}'}
+                </code>
               </pre>
             </motion.div>
           </motion.div>
