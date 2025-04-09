@@ -128,9 +128,59 @@ export default function SkillsSection() {
     },
   }
 
+  const backgroundVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 1,
+        ease: 'easeOut',
+      },
+    },
+  }
+
   return (
-    <section id='skills' className='py-20 md:py-28'>
-      <div className='container mx-auto px-4'>
+    <section id='skills' className='relative py-20 md:py-28 overflow-hidden'>
+      {/* Background Elements */}
+      <div className='absolute inset-0'>
+        <div className='absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background/90'></div>
+
+        {/* Animated blobs */}
+        <motion.div
+          className='absolute inset-0 overflow-hidden'
+          variants={backgroundVariants}
+          initial='hidden'
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          <div className='absolute top-1/3 -right-1/4 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] animate-blob'></div>
+          <div className='absolute bottom-0 -left-1/4 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[100px] animate-blob animation-delay-2000'></div>
+          <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-accent/10 rounded-full blur-[130px] animate-blob animation-delay-4000'></div>
+        </motion.div>
+
+        {/* Grain texture */}
+        <div
+          className='absolute inset-0 opacity-30 mix-blend-soft-light'
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+          }}
+        ></div>
+
+        {/* Grid pattern */}
+        <div className='absolute inset-0 bg-grid-pattern pointer-events-none opacity-30'></div>
+
+        {/* Floating particles */}
+        <div className='bg-particles absolute inset-0 z-10 pointer-events-none'>
+          <div className='particle'></div>
+          <div className='particle'></div>
+          <div className='particle'></div>
+          <div className='particle'></div>
+          <div className='particle'></div>
+          <div className='particle'></div>
+        </div>
+      </div>
+
+      <div className='container mx-auto px-4 relative z-10'>
         <SectionTitle
           eyebrow='Expertise'
           title='Technical Skills'
@@ -161,7 +211,7 @@ export default function SkillsSection() {
                 <motion.div
                   key={category.name}
                   variants={itemVariants}
-                  className='bg-background border border-gray-200 rounded-lg p-6 shadow-md'
+                  className='bg-card/30 backdrop-blur-xl border border-border/30 rounded-lg p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1'
                 >
                   <div className='flex items-center mb-4'>
                     <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3'>
@@ -179,7 +229,7 @@ export default function SkillsSection() {
                             {skill.level}%
                           </span>
                         </div>
-                        <div className='w-full bg-muted rounded-full h-2.5'>
+                        <div className='w-full bg-muted/40 rounded-full h-2.5'>
                           <motion.div
                             initial={{ width: 0 }}
                             animate={
@@ -215,6 +265,10 @@ export default function SkillsSection() {
           </motion.div>
         </div>
       </div>
+
+      {/* Bottom border/gradient effect */}
+      <div className='absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background/5 to-transparent'></div>
+      <div className='absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[120%] h-[1px] bg-gradient-to-r from-transparent via-border/30 to-transparent'></div>
     </section>
   )
 }
