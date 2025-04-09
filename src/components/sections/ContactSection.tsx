@@ -26,6 +26,7 @@ export default function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [fallbackMessage, setFallbackMessage] = useState('')
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -38,18 +39,38 @@ export default function ContactSection() {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitError('')
+    setSubmitSuccess(false)
+    setFallbackMessage('')
 
     try {
-      // TODO: Send form data to backend
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Call our API route
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
 
-      if (formData.email && formData.name && formData.message) {
-        setSubmitSuccess(true)
-        setFormData({ name: '', email: '', subject: '', message: '' })
-      } else {
-        throw new Error('Please fill out all required fields')
+      // Parse the response
+      const result = await response.json()
+
+      // Check if the request was successful
+      if (!response.ok) {
+        // Handle fallback scenario
+        if (result.fallback && result.fallbackMessage) {
+          setFallbackMessage(result.fallbackMessage)
+        }
+
+        throw new Error(
+          result.error || `Error: ${response.status} ${response.statusText}`
+        )
       }
+
+      setSubmitSuccess(true)
+      setFormData({ name: '', email: '', subject: '', message: '' })
     } catch (error) {
+      console.error('Form submission error:', error)
       setSubmitError(
         (error as Error).message || 'Something went wrong. Please try again.'
       )
@@ -249,8 +270,13 @@ export default function ContactSection() {
                 </div>
 
                 {submitError && (
-                  <div className='bg-error/10 text-error p-4 rounded-lg'>
+                  <div className='bg-error/10 text-error p-4 rounded-lg mb-6'>
                     <p>{submitError}</p>
+                    {fallbackMessage && (
+                      <p className='mt-2 text-sm font-medium'>
+                        {fallbackMessage}
+                      </p>
+                    )}
                   </div>
                 )}
 
