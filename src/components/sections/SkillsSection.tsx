@@ -1,113 +1,223 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { motion, useInView, Variants } from 'framer-motion'
 import {
-  FiCode,
-  FiCloud,
-  FiLayers,
-  FiServer,
-  FiBriefcase,
-} from 'react-icons/fi'
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Text } from '@react-three/drei'
+  SiJavascript,
+  SiTypescript,
+  SiHtml5,
+  SiCss3,
+  SiMysql,
+  SiReact,
+  SiNextdotjs,
+  SiRedux,
+  SiReactquery,
+  SiMui,
+  SiTailwindcss,
+  SiNodedotjs,
+  SiExpress,
+  SiSequelize,
+  SiMongodb,
+  SiRedis,
+  SiGit,
+  SiJira,
+  SiJest,
+  SiCypress,
+  SiGithubactions,
+  SiCloudflare,
+  SiVercel,
+  SiGithub,
+  SiPostgresql,
+} from 'react-icons/si'
+import { FaAws, FaCode, FaServer, FaCloud, FaTools } from 'react-icons/fa'
 import { SectionTitle } from '../ui/SectionTitle'
+import { IconType } from 'react-icons'
 
-const skills = {
-  languages: [
-    { name: 'JavaScript', level: 95 },
-    { name: 'TypeScript', level: 90 },
-    { name: 'HTML5', level: 95 },
-    { name: 'CSS', level: 90 },
-    { name: 'SQL', level: 85 },
-  ],
-  frontend: [
-    { name: 'React', level: 95 },
-    { name: 'Next.js', level: 90 },
-    { name: 'Redux', level: 85 },
-    { name: 'React Query', level: 85 },
-    { name: 'Material UI', level: 90 },
-    { name: 'Tailwind CSS', level: 95 },
-  ],
-  backend: [
-    { name: 'Node.js', level: 90 },
-    { name: 'Express', level: 90 },
-    { name: 'Sequelize', level: 85 },
-    { name: 'MongoDB', level: 80 },
-    { name: 'Redis', level: 75 },
-  ],
-  cloud: [
-    { name: 'AWS Elastic Beanstalk', level: 90 },
-    { name: 'AWS RDS', level: 85 },
-    { name: 'AWS Lambda', level: 85 },
-    { name: 'AWS S3', level: 95 },
-    { name: 'AWS CloudFront', level: 85 },
-  ],
-  tools: [
-    { name: 'Git', level: 90 },
-    { name: 'Jira', level: 85 },
-    { name: 'Jest', level: 80 },
-    { name: 'Cypress', level: 75 },
-    { name: 'CI/CD', level: 85 },
-  ],
+// Interface for skill items
+interface SkillItem {
+  name: string
+  icon: IconType
+  color: string
 }
 
-const skillCategories = [
-  { name: 'Languages', icon: FiCode, skills: skills.languages },
-  { name: 'Frontend', icon: FiLayers, skills: skills.frontend },
-  { name: 'Backend', icon: FiServer, skills: skills.backend },
-  { name: 'Cloud', icon: FiCloud, skills: skills.cloud },
-  { name: 'Tools', icon: FiBriefcase, skills: skills.tools },
-]
-
-// 3D Skill Cloud component
-const SkillCloud = () => {
-  const points = Object.values(skills)
-    .flat()
-    .map((skill, i) => {
-      const phi = Math.acos(-1 + (2 * i) / 50)
-      const theta = Math.sqrt(50 * Math.PI) * phi
-
-      return {
-        position: [
-          2.5 * Math.cos(theta) * Math.sin(phi),
-          2.5 * Math.sin(theta) * Math.sin(phi),
-          2.5 * Math.cos(phi),
-        ] as [number, number, number],
-        name: skill.name,
-      }
-    })
-
+// SkillCard component for reusable skill cards with consistent hover effects
+const SkillCard = ({
+  skill,
+  hoveredSkill,
+  setHoveredSkill,
+  custom,
+  variants,
+  ringColor,
+}: {
+  skill: SkillItem
+  hoveredSkill: string | null
+  setHoveredSkill: (name: string | null) => void
+  custom: number
+  variants: Variants
+  ringColor: string
+}) => {
   return (
-    <Canvas camera={{ position: [0, 0, 5], fov: 90 }}>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
-      <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+    <motion.div
+      key={skill.name}
+      custom={custom}
+      variants={variants}
+      initial='initial'
+      whileHover={{
+        y: -4,
+        transition: { duration: 0.2, ease: 'easeOut' },
+      }}
+      onHoverStart={() => setHoveredSkill(skill.name)}
+      onHoverEnd={() => setHoveredSkill(null)}
+      className='bg-card/40 backdrop-blur-md border border-border/30 rounded-xl p-5 flex flex-col items-center justify-center shadow-lg transition-all duration-300 relative overflow-hidden group hover:border-border/10 hover:shadow-xl'
+    >
+      {/* Background effects */}
+      <div className='absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500'></div>
 
-      {points.map((point, i) => (
-        <group key={i} position={point.position}>
-          <mesh>
-            <sphereGeometry args={[0.05, 16, 16]} />
-            <meshStandardMaterial color='#3490dc' />
-          </mesh>
-          <Text
-            position={[0, 0, 0.1]}
-            fontSize={0.15}
-            color='#ffffff'
-            anchorX='center'
-            anchorY='middle'
-          >
-            {point.name}
-          </Text>
-        </group>
-      ))}
-    </Canvas>
+      {/* Top gradient border effect */}
+      <div
+        className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${ringColor} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500`}
+      ></div>
+
+      {/* Subtle luminance effect */}
+      <div className='absolute -inset-4 bg-primary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000'></div>
+
+      {/* Inner shadow highlight */}
+      <div className='absolute inset-0 rounded-xl shadow-[inset_0_0_20px_rgba(var(--primary-rgb),0.03)] opacity-0 group-hover:opacity-100 transition-opacity duration-500'></div>
+
+      {/* Icon with glow */}
+      <div className='relative h-14 flex items-center justify-center mb-3 z-10 transition-transform duration-300 transform group-hover:scale-[1.05]'>
+        <div
+          className={`absolute inset-0 rounded-full bg-gradient-to-r from-primary/5 to-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+        ></div>
+        <div
+          className={`p-3 relative ${
+            hoveredSkill === skill.name ? 'scale-110' : 'scale-100'
+          } transition-transform duration-300`}
+        >
+          <skill.icon className={`w-8 h-8 ${skill.color}`} />
+        </div>
+      </div>
+
+      {/* Skill name */}
+      <div className='text-center relative z-10'>
+        <span className='text-base font-medium text-foreground/90 transition-colors duration-300 group-hover:text-foreground'>
+          {skill.name}
+        </span>
+      </div>
+
+      {/* Outer shadow effect */}
+      <div className='absolute inset-0 rounded-xl shadow-lg shadow-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none'></div>
+    </motion.div>
   )
 }
 
+// Define the skill categories and their icons
+const skillGroups = [
+  {
+    title: 'Frontend',
+    description: 'Building exceptional user interfaces',
+    icon: FaCode,
+    ringColor: 'from-blue-500 to-indigo-600',
+    iconBgColor: 'bg-blue-900/90',
+    bgGradient:
+      'bg-gradient-to-br from-blue-500/5 via-indigo-500/5 to-blue-500/5',
+    skills: [
+      { name: 'React', icon: SiReact, color: 'text-blue-500' },
+      {
+        name: 'Next.js',
+        icon: SiNextdotjs,
+        color: 'text-slate-800 dark:text-slate-200',
+      },
+      { name: 'TypeScript', icon: SiTypescript, color: 'text-blue-600' },
+      { name: 'JavaScript', icon: SiJavascript, color: 'text-yellow-500' },
+      { name: 'Redux', icon: SiRedux, color: 'text-purple-600' },
+      { name: 'React Query', icon: SiReactquery, color: 'text-red-600' },
+      { name: 'Tailwind CSS', icon: SiTailwindcss, color: 'text-cyan-500' },
+      { name: 'Material UI', icon: SiMui, color: 'text-blue-400' },
+      { name: 'HTML5', icon: SiHtml5, color: 'text-orange-600' },
+      { name: 'CSS3', icon: SiCss3, color: 'text-blue-500' },
+    ],
+  },
+  {
+    title: 'Backend',
+    description: 'Crafting robust server-side solutions',
+    icon: FaServer,
+    ringColor: 'from-emerald-500 to-green-600',
+    iconBgColor: 'bg-emerald-900/90',
+    bgGradient:
+      'bg-gradient-to-br from-emerald-500/5 via-green-500/5 to-emerald-500/5',
+    skills: [
+      { name: 'Node.js', icon: SiNodedotjs, color: 'text-green-600' },
+      {
+        name: 'Express',
+        icon: SiExpress,
+        color: 'text-slate-800 dark:text-slate-200',
+      },
+      { name: 'Sequelize', icon: SiSequelize, color: 'text-blue-600' },
+      { name: 'MongoDB', icon: SiMongodb, color: 'text-green-500' },
+      { name: 'PostgreSQL', icon: SiPostgresql, color: 'text-blue-600' },
+      { name: 'MySQL', icon: SiMysql, color: 'text-blue-500' },
+      { name: 'Redis', icon: SiRedis, color: 'text-red-600' },
+    ],
+  },
+  {
+    title: 'Cloud & DevOps',
+    description: 'Scaling applications in the cloud',
+    icon: FaCloud,
+    ringColor: 'from-purple-500 to-violet-600',
+    iconBgColor: 'bg-purple-900/90',
+    bgGradient:
+      'bg-gradient-to-br from-purple-500/5 via-violet-500/5 to-purple-500/5',
+    skills: [
+      { name: 'AWS', icon: FaAws, color: 'text-orange-500' },
+      { name: 'Elastic Beanstalk', icon: FaAws, color: 'text-orange-500' },
+      { name: 'Lambda', icon: FaAws, color: 'text-orange-500' },
+      { name: 'S3', icon: FaAws, color: 'text-orange-500' },
+      { name: 'EC2', icon: FaAws, color: 'text-orange-500' },
+      { name: 'RDS', icon: FaAws, color: 'text-orange-500' },
+      { name: 'CloudWatch', icon: FaAws, color: 'text-orange-500' },
+      { name: 'Route 53', icon: FaAws, color: 'text-orange-500' },
+      { name: 'CloudFront', icon: FaAws, color: 'text-orange-500' },
+      { name: 'Cloudflare', icon: SiCloudflare, color: 'text-orange-500' },
+      {
+        name: 'Vercel',
+        icon: SiVercel,
+        color: 'text-slate-800 dark:text-slate-200',
+      },
+    ],
+  },
+  {
+    title: 'Tools & Workflow',
+    description: 'Optimizing development processes',
+    icon: FaTools,
+    ringColor: 'from-amber-500 to-orange-600',
+    iconBgColor: 'bg-amber-900/90',
+    bgGradient:
+      'bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-amber-500/5',
+    skills: [
+      { name: 'Git', icon: SiGit, color: 'text-orange-600' },
+      {
+        name: 'GitHub',
+        icon: SiGithub,
+        color: 'text-slate-800 dark:text-slate-200',
+      },
+      { name: 'GitHub Actions', icon: SiGithubactions, color: 'text-blue-600' },
+      { name: 'Jira', icon: SiJira, color: 'text-blue-500' },
+      { name: 'Jest', icon: SiJest, color: 'text-red-600' },
+      {
+        name: 'Cypress',
+        icon: SiCypress,
+        color: 'text-slate-700 dark:text-slate-200',
+      },
+      { name: 'CI/CD', icon: SiGithubactions, color: 'text-green-600' },
+    ],
+  },
+]
+
 export default function SkillsSection() {
   const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px 0px' })
+  const isInView = useInView(ref, { once: true, margin: '-50px 0px' })
+  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null)
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -115,16 +225,39 @@ export default function SkillsSection() {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
+        delayChildren: 0.3,
       },
     },
   }
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
+  const skillGroupVariants = {
+    hidden: { y: 60, opacity: 0 },
+    visible: (i: number) => ({
       y: 0,
       opacity: 1,
-      transition: { duration: 0.5 },
+      transition: {
+        duration: 0.8,
+        ease: [0.215, 0.61, 0.355, 1],
+        delay: i * 0.15,
+      },
+    }),
+  }
+
+  const skillItemVariants = {
+    hidden: { scale: 0.8, opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      scale: 1,
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: 'easeOut',
+        delay: 0.1 + i * 0.04,
+      },
+    }),
+    initial: {
+      boxShadow: '0 0 0 rgba(var(--primary-rgb), 0)',
+      y: 0,
     },
   }
 
@@ -139,8 +272,18 @@ export default function SkillsSection() {
     },
   }
 
+  const pulseAnimation = {
+    scale: [1, 1.05, 1],
+    opacity: [0.7, 1, 0.7],
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: 'easeInOut',
+    },
+  }
+
   return (
-    <section id='skills' className='relative py-20 md:py-28 overflow-hidden'>
+    <section id='skills' className='relative py-24 md:py-32 overflow-hidden'>
       {/* Background Elements */}
       <div className='absolute inset-0'>
         <div className='absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background/90'></div>
@@ -170,7 +313,7 @@ export default function SkillsSection() {
         <div className='absolute inset-0 bg-grid-pattern pointer-events-none opacity-30'></div>
 
         {/* Floating particles */}
-        <div className='bg-particles absolute inset-0 z-10 pointer-events-none'>
+        <div className='bg-particles absolute inset-0 z-5 pointer-events-none'>
           <div className='particle'></div>
           <div className='particle'></div>
           <div className='particle'></div>
@@ -180,90 +323,100 @@ export default function SkillsSection() {
         </div>
       </div>
 
-      <div className='container mx-auto px-4 relative z-10'>
+      <div className='container mx-auto px-4 relative z-20'>
+        {/* Section Title */}
         <SectionTitle
-          eyebrow='Expertise'
-          title='Technical Skills'
-          description='My proficiency across various technologies and tools.'
+          eyebrow='SKILLS'
+          title='My Technical Arsenal'
+          description="A comprehensive toolkit of technologies I've mastered, enabling me to architect, build and deploy sophisticated digital solutions from concept to production."
         />
 
-        <div className='grid grid-cols-1 lg:grid-cols-5 gap-8'>
-          {/* 3D Skill Cloud (Mobile View) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className='lg:hidden w-full h-[300px] mb-12'
-          >
-            <SkillCloud />
-          </motion.div>
+        <motion.div
+          ref={ref}
+          variants={containerVariants}
+          initial='hidden'
+          animate={isInView ? 'visible' : 'hidden'}
+          className='mt-16 grid gap-16'
+        >
+          {skillGroups.map((group, index) => (
+            <motion.div
+              key={group.title}
+              variants={skillGroupVariants}
+              custom={index}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.215, 0.61, 0.355, 1] }}
+              className={`relative ${group.bgGradient} backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-border/30 overflow-hidden`}
+            >
+              {/* Decorative elements */}
+              <div className='absolute -right-20 -bottom-20 w-80 h-80 bg-gradient-to-br from-primary/5 to-primary/10 rounded-full blur-3xl'></div>
+              <div className='absolute -left-20 -top-20 w-80 h-80 bg-gradient-to-tr from-accent/5 to-accent/10 rounded-full blur-3xl'></div>
 
-          {/* Skills List */}
-          <motion.div
-            ref={ref}
-            variants={containerVariants}
-            initial='hidden'
-            animate={isInView ? 'visible' : 'hidden'}
-            className='col-span-3'
-          >
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
-              {skillCategories.map((category) => (
+              {/* Group header with icon */}
+              <div className='flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8 mb-10 relative'>
                 <motion.div
-                  key={category.name}
-                  variants={itemVariants}
-                  className='bg-card/30 backdrop-blur-xl border border-border/30 rounded-lg p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1'
+                  className={`w-16 h-16 rounded-2xl ${group.iconBgColor} flex items-center justify-center shadow-lg relative z-10`}
+                  whileHover={{
+                    rotate: [0, -5, 5, -5, 0],
+                    transition: { duration: 0.5 },
+                  }}
                 >
-                  <div className='flex items-center mb-4'>
-                    <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3'>
-                      <category.icon className='w-5 h-5 text-primary' />
-                    </div>
-                    <h3 className='text-xl font-semibold'>{category.name}</h3>
-                  </div>
-
-                  <div className='space-y-4'>
-                    {category.skills.map((skill, skillIndex) => (
-                      <div key={skill.name}>
-                        <div className='flex justify-between mb-1 text-sm'>
-                          <span>{skill.name}</span>
-                          <span className='text-muted-foreground'>
-                            {skill.level}%
-                          </span>
-                        </div>
-                        <div className='w-full bg-muted/40 rounded-full h-2.5'>
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={
-                              isInView
-                                ? { width: `${skill.level}%` }
-                                : { width: 0 }
-                            }
-                            transition={{
-                              duration: 0.8,
-                              delay: 0.2 + 0.05 * skillIndex,
-                            }}
-                            className='h-2.5 rounded-full bg-gradient-to-r from-primary to-secondary'
-                          ></motion.div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <group.icon className='text-white w-8 h-8' />
+                  <motion.div
+                    className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${group.ringColor} opacity-30 blur-sm`}
+                    animate={pulseAnimation}
+                  />
                 </motion.div>
-              ))}
-            </div>
-          </motion.div>
 
-          {/* 3D Skill Cloud (Desktop View) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className='hidden lg:block col-span-2 h-full'
-          >
-            <div className='h-[500px] w-full'>
-              <SkillCloud />
-            </div>
-          </motion.div>
-        </div>
+                <div className='flex-1'>
+                  <h3 className='text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80'>
+                    {group.title}
+                  </h3>
+                  <p className='text-lg text-muted-foreground mt-1'>
+                    {group.description}
+                  </p>
+                </div>
+
+                <div
+                  className={`hidden md:block h-12 w-[2px] rounded-full bg-gradient-to-b ${group.ringColor} opacity-40 mx-4`}
+                ></div>
+
+                <div className='hidden md:flex items-center gap-2'>
+                  <motion.div
+                    className={`w-3 h-3 rounded-full ${
+                      group.title === 'Frontend'
+                        ? 'bg-blue-500'
+                        : group.title === 'Backend'
+                        ? 'bg-green-600'
+                        : group.title === 'Cloud & DevOps'
+                        ? 'bg-purple-600'
+                        : 'bg-amber-500'
+                    }`}
+                    animate={pulseAnimation}
+                  />
+                  <span className='text-sm font-medium text-muted-foreground'>
+                    {group.skills.length} Technologies
+                  </span>
+                </div>
+              </div>
+
+              {/* Skills grid */}
+              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 relative z-10'>
+                {group.skills.map((skill, skillIndex) => (
+                  <SkillCard
+                    key={skill.name}
+                    skill={skill}
+                    hoveredSkill={hoveredSkill}
+                    setHoveredSkill={setHoveredSkill}
+                    custom={skillIndex}
+                    variants={skillItemVariants}
+                    ringColor={group.ringColor}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
 
       {/* Bottom border/gradient effect */}
