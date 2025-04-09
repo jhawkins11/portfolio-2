@@ -31,10 +31,22 @@ const experiences = [
         highlightPhrase: '675K product orders',
       },
       {
+        highlight: 'Payment Systems',
+        text: 'Spearheaded the development and integration of comprehensive layaway and cryptocurrency payment systems, processing over $125K in alternative payments within the first year.',
+        impact: '$125K in alternative payments',
+        highlightPhrase: '$125K in alternative payments',
+      },
+      {
         highlight: 'Performance Optimization',
         text: 'Reduced load times by 1.5s (per Lighthouse) by serving S3 images via Cloudfront CDN with auto compression and Next.js caching.',
         impact: '1.5s faster load times',
         highlightPhrase: 'Reduced load times by 1.5s',
+      },
+      {
+        highlight: 'Distributor Integration',
+        text: 'Integrated a major third-party distributor API for drop-shipping capabilities, automating inventory synchronization for 18K+ SKUs, product data ingestion, and streamlining order fulfillment processes.',
+        impact: 'Automated 18K+ SKUs synchronization',
+        highlightPhrase: '18K+ SKUs',
       },
       {
         highlight: 'SEO Enhancement',
@@ -65,6 +77,18 @@ const experiences = [
         text: 'Accelerated production releases by 30 min through a streamlined CI/CD framework using AWS CodePipeline and Jest.',
         impact: '30 min faster deployments',
         highlightPhrase: 'Accelerated production releases by 30 min',
+      },
+      {
+        highlight: 'Business Intelligence',
+        text: 'Developed key business intelligence dashboards providing insights into sales by state/promo code, inventory levels, and webinar performance using Node.js and MySQL/Sequelize.',
+        impact: 'Enhanced data-driven decision making',
+        highlightPhrase: 'business intelligence dashboards',
+      },
+      {
+        highlight: 'AI Integration',
+        text: 'Integrated GPT-4 API for automated marketing email generation, product descriptions, and SEO meta content.',
+        impact: 'Automated content generation',
+        highlightPhrase: 'GPT-4 API',
       },
     ],
   },
