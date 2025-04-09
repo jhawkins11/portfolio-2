@@ -5,6 +5,7 @@ import AboutSection from '../components/sections/AboutSection'
 import ExperienceSection from '../components/sections/ExperienceSection'
 import ProjectsSection from '../components/sections/ProjectsSection'
 import SkillsSection from '../components/sections/SkillsSection'
+import GitHubActivitySection from '../components/sections/GitHubActivitySection'
 import ContactSection from '../components/sections/ContactSection'
 import Footer from '../components/ui/Footer'
 
@@ -17,6 +18,7 @@ export default function Home() {
       <ExperienceSection />
       <ProjectsSection />
       <SkillsSection />
+      <GitHubActivitySection />
       <ContactSection />
       <Footer />
     </main>

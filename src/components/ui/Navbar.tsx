@@ -15,7 +15,7 @@ const navLinks = [
 ]
 
 const socialLinks = [
-  { href: 'https://github.com/josiahhawkins', label: 'GitHub', icon: FiGithub },
+  { href: 'https://github.com/jhawkins11', label: 'GitHub', icon: FiGithub },
   {
     href: 'https://linkedin.com/in/josiahhawkins',
     label: 'LinkedIn',
@@ -69,25 +69,27 @@ export default function Navbar() {
     >
       <div className='max-w-7xl mx-auto flex items-center justify-between'>
         <motion.div
-          className='flex-shrink-0 font-bold text-2xl relative group'
+          className='flex-shrink-0 font-bold text-2xl relative'
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
           <Link href='/#hero' className='relative z-10 flex items-center'>
             <div className='relative inline-flex items-center justify-center'>
-              <div className='relative z-10 p-2 group transition-all duration-300 rounded-full hover:bg-primary/5'>
-                <motion.img
-                  src='/logo.svg'
-                  width={50}
-                  height={50}
-                  alt='JH Logo'
-                  className='logo transition-all duration-300'
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8 }}
-                />
-              </div>
+              <motion.img
+                src='/logo.png'
+                width={80}
+                height={80}
+                alt='JH Logo'
+                className='logo transition-all duration-300'
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                whileHover={{
+                  scale: 1.05,
+                  transition: { duration: 0.2 },
+                }}
+              />
             </div>
           </Link>
         </motion.div>

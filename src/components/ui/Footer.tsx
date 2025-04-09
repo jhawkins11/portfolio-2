@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { FiGithub, FiLinkedin, FiMail, FiArrowUp } from 'react-icons/fi'
 
 const socialLinks = [
-  { href: 'https://github.com/josiahhawkins', label: 'GitHub', icon: FiGithub },
+  { href: 'https://github.com/jhawkins11', label: 'GitHub', icon: FiGithub },
   {
     href: 'https://linkedin.com/in/josiahhawkins',
     label: 'LinkedIn',

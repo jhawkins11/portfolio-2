@@ -107,8 +107,8 @@ export default function ContactSection() {
     {
       icon: FiGithub,
       label: 'GitHub',
-      value: 'github.com/josiahhawkins',
-      href: 'https://github.com/josiahhawkins',
+      value: 'github.com/jhawkins11',
+      href: 'https://github.com/jhawkins11',
     },
   ]
 
