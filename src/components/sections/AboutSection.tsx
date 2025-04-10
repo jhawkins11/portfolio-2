@@ -263,12 +263,14 @@ export default function AboutSection() {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className='bg-card/40 backdrop-blur-xl rounded-xl p-6 border border-border/30 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative group'
+                className='bg-card/40 backdrop-blur-xl rounded-xl p-6 border border-border/30 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative group overflow-hidden'
               >
                 {/* Top decoration line */}
-                <div
-                  className={`absolute top-0 left-0 right-0 h-[2px] rounded-t-xl bg-gradient-to-r ${card.color} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300`}
-                ></div>
+                <div className='absolute top-0 inset-x-0 h-[2px] overflow-hidden rounded-t-xl'>
+                  <div
+                    className={`w-full h-full bg-gradient-to-r ${card.color} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300`}
+                  ></div>
+                </div>
 
                 <div className='flex items-start space-x-4'>
                   <div
