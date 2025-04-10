@@ -4,8 +4,13 @@ import { useState, createContext, useContext, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { FiPlus, FiTool } from 'react-icons/fi'
 import { useFrame } from '@react-three/fiber'
+import dynamic from 'next/dynamic'
 
-import ShapeGenerator from './ShapeGenerator'
+// Dynamic import for ShapeGenerator
+const ShapeGenerator = dynamic(() => import('./ShapeGenerator'), {
+  ssr: false,
+})
+
 import DrawingCanvasPortal from './DrawingCanvasPortal'
 
 // Create a context to share state between components

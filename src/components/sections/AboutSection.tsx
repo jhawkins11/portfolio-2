@@ -294,44 +294,6 @@ export default function AboutSection() {
           </motion.div>
         </div>
       </div>
-
-      {/* Terminal gradient and particles styles */}
-      <style jsx>{`
-        .code-particles::before,
-        .code-particles::after {
-          content: '{ } < / > ( ) => ;';
-          position: absolute;
-          font-family: monospace;
-          font-size: 10px;
-          color: rgba(var(--primary-rgb), 0.1);
-          pointer-events: none;
-          white-space: nowrap;
-        }
-
-        .code-particles::before {
-          top: 30%;
-          left: 10%;
-          animation: float 15s linear infinite;
-        }
-
-        .code-particles::after {
-          bottom: 25%;
-          right: 15%;
-          animation: float 12s linear infinite reverse;
-        }
-
-        @keyframes float {
-          0% {
-            transform: translate(0, 0) rotate(0deg);
-          }
-          50% {
-            transform: translate(20px, 15px) rotate(180deg);
-          }
-          100% {
-            transform: translate(0, 0) rotate(360deg);
-          }
-        }
-      `}</style>
     </section>
   )
 }

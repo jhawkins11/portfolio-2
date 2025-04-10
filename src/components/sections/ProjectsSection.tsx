@@ -2,11 +2,10 @@
 
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { FiExternalLink, FiGithub, FiFolder } from 'react-icons/fi'
+import { FiExternalLink, FiFolder, FiGithub } from 'react-icons/fi'
 import { SectionTitle } from '../ui/SectionTitle'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import ProjectDetailModal from '../ui/ProjectDetailModal'
 import {
   SiReact,
   SiNextdotjs,
@@ -15,6 +14,10 @@ import {
   SiOpenai,
 } from 'react-icons/si'
 import { IconType } from 'react-icons'
+
+const ProjectDetailModal = dynamic(() => import('../ui/ProjectDetailModal'), {
+  ssr: false,
+})
 
 type Project = {
   id: string
@@ -32,17 +35,6 @@ type Project = {
   outcomes?: string[]
 }
 
-// Dynamically import the 3D folder component with no SSR
-const FolderCanvas = dynamic(() => import('../ui/3D/FolderCanvas'), {
-  ssr: false,
-  loading: () => (
-    <div className='w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center'>
-      <FiFolder className='w-6 h-6 text-primary' />
-    </div>
-  ),
-})
-
-// Base64 encoded SVG placeholder
 const PLACEHOLDER_IMAGE =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMzMzMiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM1NTUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2EpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjI0IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+UHJvamVjdCBJbWFnZTwvdGV4dD48L3N2Zz4='
 
@@ -447,217 +439,201 @@ export default function ProjectsSection() {
     },
   }
 
-  const render = (
-    <section id='projects' className='relative py-24 overflow-hidden'>
-      {/* Background Gradient Layer */}
-      <div className='absolute inset-0'>
-        <div className='absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background/98'></div>
-
-        {/* Grain texture */}
-        <div
-          className='absolute inset-0 opacity-25 mix-blend-soft-light'
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat',
-          }}
-        ></div>
-      </div>
-
-      {/* Background Blobs */}
-      <motion.div
-        className='absolute inset-0 overflow-hidden'
-        variants={backgroundVariants}
-        initial='hidden'
-        animate={isInView ? 'visible' : 'hidden'}
-      >
-        <div className='absolute -top-[30%] -left-[30%] w-[120vw] h-[120vh] bg-primary/10 rounded-full blur-3xl animate-blob' />
-        <div className='absolute -bottom-[30%] -right-[30%] w-[120vw] h-[120vh] bg-secondary/10 rounded-full blur-3xl animate-blob animation-delay-2000' />
-        <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[100vh] bg-accent/10 rounded-full blur-3xl animate-blob animation-delay-4000' />
-
-        {/* Noise Overlay */}
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-8 mix-blend-overlay" />
-      </motion.div>
-
-      <div className='container mx-auto px-4 relative z-10'>
-        <SectionTitle
-          eyebrow='Portfolio'
-          title='Featured Projects'
-          description='Showcasing my best work and technical capabilities.'
-        />
-
-        <motion.div
-          ref={ref}
-          variants={containerVariants}
-          initial='hidden'
-          animate={isInView ? 'visible' : 'hidden'}
-          className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-        >
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              variants={itemVariants}
-              whileHover='hover'
-              initial='initial'
-              className='relative group cursor-pointer'
-              onClick={() => handleProjectClick(project)}
-              layoutId={`card-container-${project.id}`}
-            >
-              <div
-                className='bg-background border border-gray-200 rounded-lg p-6 h-full flex flex-col transition-all duration-300
-                               shadow-md hover:shadow-xl group-hover:-translate-y-2 overflow-hidden'
-              >
-                {/* Background Glow Effect */}
-                <motion.div
-                  className='absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg'
-                  variants={glowVariants}
-                />
-
-                {/* Border Highlight */}
-                <motion.div
-                  className='absolute inset-0 rounded-lg border border-transparent group-hover:border-primary/20 transition-colors duration-300'
-                  variants={borderVariants}
-                />
-
-                {/* Inner Shadow */}
-                <div className='absolute inset-0 rounded-lg shadow-[inset_0_0_20px_rgba(0,0,0,0.05)] group-hover:shadow-[inset_0_0_30px_rgba(0,0,0,0.1)] transition-shadow duration-300' />
-
-                {/* Content Container */}
-                <motion.div
-                  className='relative z-10 flex flex-col h-full'
-                  layoutId={`card-content-${project.id}`}
-                >
-                  {/* Top header */}
-                  <div className='flex justify-between items-center mb-4'>
-                    <FolderCanvas />
-
-                    <div className='flex space-x-4'>
-                      {project.links.github && (
-                        <a
-                          href={project.links.github}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='text-muted-foreground hover:text-primary transition-colors z-20'
-                          aria-label='View GitHub repository'
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <FiGithub className='w-5 h-5' />
-                        </a>
-                      )}
-
-                      {project.links.live && (
-                        <a
-                          href={project.links.live}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='text-muted-foreground hover:text-primary transition-colors z-20'
-                          aria-label='View live site'
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <FiExternalLink className='w-5 h-5' />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Project Image */}
-                  <motion.div
-                    className='w-full h-48 mb-5 rounded-lg overflow-hidden relative'
-                    layoutId={`card-image-${project.id}`}
-                  >
-                    <motion.div
-                      className={`w-full h-full relative overflow-hidden ${
-                        project.id === 'stocks-dashboard' ||
-                        project.id === 'doc-genie'
-                          ? 'bg-black'
-                          : ''
-                      }`}
-                      variants={imageHoverVariants}
-                    >
-                      <Image
-                        src={project.images[0] || PLACEHOLDER_IMAGE}
-                        alt={`Screenshot of ${project.title} project`}
-                        className='transition-transform duration-300 object-cover'
-                        priority={index === 0}
-                        fill
-                        sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
-                        placeholder='blur'
-                        blurDataURL={PLACEHOLDER_IMAGE}
-                      />
-                      <div className='absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-30 group-hover:opacity-10 transition-opacity duration-300' />
-
-                      {/* View details overlay that appears on hover */}
-                      <div className='absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
-                        <span className='px-4 py-2 bg-primary text-white rounded-md text-sm font-medium'>
-                          View Details
-                        </span>
-                      </div>
-                    </motion.div>
-                  </motion.div>
-
-                  {/* Content */}
-                  <motion.h3
-                    className='text-xl font-bold mb-2 text-foreground'
-                    layoutId={`card-title-${project.id}`}
-                  >
-                    {project.title}
-                  </motion.h3>
-
-                  <p className='text-muted-foreground mb-5 text-sm leading-relaxed'>
-                    {project.description}
-                  </p>
-
-                  {/* Tags Section (moved up for card view simplicity) */}
-                  <div className='flex flex-wrap gap-2 mt-auto'>
-                    {project.tags.map((tag, i) => (
-                      <motion.span
-                        key={i}
-                        className='text-xs font-medium bg-muted/50 px-3 py-1.5 rounded-full text-muted-foreground flex items-center gap-1.5'
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        <tag.icon className='w-3.5 h-3.5' />
-                        {tag.name}
-                      </motion.span>
-                    ))}
-                  </div>
-                </motion.div>
-
-                {/* Decorative gradient - moved outside the content container and positioned at bottom */}
-                <div className='absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary to-secondary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left'></div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {projects.length > 3 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className='flex justify-center mt-12'
-          >
-            <a
-              href='/projects'
-              className='btn bg-transparent border border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-md font-medium transition-all'
-            >
-              View all projects
-            </a>
-          </motion.div>
-        )}
-      </div>
-    </section>
-  )
-
   return (
     <>
-      {render}
+      <section id='projects' className='relative py-24 overflow-hidden'>
+        {/* Background Gradient Layer */}
+        <div className='absolute inset-0'>
+          <div className='absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background/98'></div>
+
+          {/* Grain texture */}
+          <div
+            className='absolute inset-0 opacity-25 mix-blend-soft-light'
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'repeat',
+            }}
+          ></div>
+        </div>
+
+        {/* Background Blobs */}
+        <motion.div
+          className='absolute inset-0 overflow-hidden'
+          variants={backgroundVariants}
+          initial='hidden'
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          <div className='absolute -top-[30%] -left-[30%] w-[120vw] h-[120vh] bg-primary/10 rounded-full blur-3xl animate-blob' />
+          <div className='absolute -bottom-[30%] -right-[30%] w-[120vw] h-[120vh] bg-secondary/10 rounded-full blur-3xl animate-blob animation-delay-2000' />
+          <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[100vh] bg-accent/10 rounded-full blur-3xl animate-blob animation-delay-4000' />
+        </motion.div>
+
+        <div className='container mx-auto px-4 relative z-10'>
+          <SectionTitle
+            eyebrow='Portfolio'
+            title='Featured Projects'
+            description='Showcasing my best work and technical capabilities.'
+          />
+
+          <motion.div
+            ref={ref}
+            variants={containerVariants}
+            initial='hidden'
+            animate={isInView ? 'visible' : 'hidden'}
+            className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+          >
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                variants={itemVariants}
+                whileHover='hover'
+                initial='initial'
+                className='relative group cursor-pointer'
+                onClick={() => handleProjectClick(project)}
+              >
+                <div
+                  className='bg-background border border-gray-200 rounded-lg p-6 h-full flex flex-col transition-all duration-300
+                               shadow-md hover:shadow-xl group-hover:-translate-y-2 overflow-hidden'
+                >
+                  {/* Background Glow Effect */}
+                  <motion.div
+                    className='absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg'
+                    variants={glowVariants}
+                  />
+
+                  {/* Border Highlight */}
+                  <motion.div
+                    className='absolute inset-0 rounded-lg border border-transparent group-hover:border-primary/20 transition-colors duration-300'
+                    variants={borderVariants}
+                  />
+
+                  {/* Inner Shadow */}
+                  <div className='absolute inset-0 rounded-lg shadow-[inset_0_0_20px_rgba(0,0,0,0.05)] group-hover:shadow-[inset_0_0_30px_rgba(0,0,0,0.1)] transition-shadow duration-300' />
+
+                  {/* Content Container */}
+                  <motion.div className='relative z-10 flex flex-col h-full'>
+                    {/* Top header */}
+                    <div className='flex justify-between items-center mb-4'>
+                      <div className='bg-primary/10 rounded-lg p-2'>
+                        <FiFolder className='w-5 h-5' />
+                      </div>
+
+                      <div className='flex space-x-4'>
+                        {project.links.github && (
+                          <a
+                            href={project.links.github}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-muted-foreground hover:text-primary transition-colors z-20'
+                            aria-label='View GitHub repository'
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <FiGithub className='w-5 h-5' />
+                          </a>
+                        )}
+
+                        {project.links.live && (
+                          <a
+                            href={project.links.live}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-muted-foreground hover:text-primary transition-colors z-20'
+                            aria-label='View live site'
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <FiExternalLink className='w-5 h-5' />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Project Image */}
+                    <motion.div className='w-full h-48 mb-5 rounded-lg overflow-hidden relative'>
+                      <motion.div
+                        className={`w-full h-full relative overflow-hidden ${
+                          project.id === 'stocks-dashboard' ||
+                          project.id === 'doc-genie'
+                            ? 'bg-black'
+                            : ''
+                        }`}
+                        variants={imageHoverVariants}
+                      >
+                        <Image
+                          src={project.images[0] || PLACEHOLDER_IMAGE}
+                          alt={`Screenshot of ${project.title} project`}
+                          className='transition-transform duration-300 object-cover'
+                          priority={index === 0}
+                          fill
+                          sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+                          placeholder='blur'
+                          blurDataURL={PLACEHOLDER_IMAGE}
+                        />
+                        <div className='absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-30 group-hover:opacity-10 transition-opacity duration-300' />
+
+                        {/* View details overlay that appears on hover */}
+                        <div className='absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                          <span className='px-4 py-2 bg-primary text-white rounded-md text-sm font-medium'>
+                            View Details
+                          </span>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+
+                    {/* Content */}
+                    <motion.h3 className='text-xl font-bold mb-2 text-foreground'>
+                      {project.title}
+                    </motion.h3>
+
+                    <p className='text-muted-foreground mb-5 text-sm leading-relaxed'>
+                      {project.description}
+                    </p>
+
+                    {/* Tags Section (moved up for card view simplicity) */}
+                    <div className='flex flex-wrap gap-2 mt-auto'>
+                      {project.tags.map((tag, i) => (
+                        <motion.span
+                          key={i}
+                          className='text-xs font-medium bg-muted/50 px-3 py-1.5 rounded-full text-muted-foreground flex items-center gap-1.5'
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <tag.icon className='w-3.5 h-3.5' />
+                          {tag.name}
+                        </motion.span>
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Decorative gradient - moved outside the content container and positioned at bottom */}
+                  <div className='absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary to-secondary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left'></div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {projects.length > 3 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              className='flex justify-center mt-12'
+            >
+              <a
+                href='/projects'
+                className='btn bg-transparent border border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-md font-medium transition-all'
+              >
+                View all projects
+              </a>
+            </motion.div>
+          )}
+        </div>
+      </section>
 
       <AnimatePresence>
-        {selectedProject && (
-          <ProjectDetailModal
-            project={selectedProject}
-            onClose={handleCloseModal}
-          />
-        )}
+        <ProjectDetailModal
+          key={selectedProject?.id || 'modal-closed'}
+          project={selectedProject}
+          onClose={handleCloseModal}
+        />
       </AnimatePresence>
     </>
   )

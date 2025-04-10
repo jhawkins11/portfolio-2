@@ -28,7 +28,7 @@ type Project = {
 }
 
 interface ProjectDetailModalProps {
-  project: Project
+  project: Project | null
   onClose: () => void
 }
 
@@ -37,6 +37,13 @@ export default function ProjectDetailModal({
   onClose,
 }: ProjectDetailModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [])
+  if (!project) return null
 
   const prevImage = () => {
     setCurrentImageIndex((prev) =>
@@ -49,13 +56,6 @@ export default function ProjectDetailModal({
       prev === project.images.length - 1 ? 0 : prev + 1
     )
   }
-
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [])
 
   return (
     <motion.div
