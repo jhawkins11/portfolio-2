@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { MeshDistortMaterial, Sphere, Float } from '@react-three/drei'
@@ -208,6 +208,13 @@ const DEFAULT_PLAYGROUND_SETTINGS: PlaygroundSettings = {
   },
 }
 
+// Memoize components that receive props from HeroSection
+const MemoizedAnimatedSphere = memo(AnimatedSphere)
+const MemoizedFloatingObjects = memo(FloatingObjects)
+const MemoizedMouseLight = memo(MouseLight)
+const MemoizedPlaygroundControls = memo(PlaygroundControls)
+const MemoizedCustomShapes = memo(CustomShapes)
+
 export default function HeroSection() {
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
   const targetCursorPos = useRef({ x: 0, y: 0 })
@@ -351,6 +358,10 @@ export default function HeroSection() {
     setActiveControlPoint(null)
   }, [])
 
+  const handleSettingsClickForCustomShapes = useCallback(() => {
+    openControls('shapes')
+  }, [openControls])
+
   const nameVariants = {
     initial: { opacity: 0, y: 20 },
     animate: (i: number) => ({
@@ -420,7 +431,7 @@ export default function HeroSection() {
                 angle={0.4}
                 penumbra={1}
               />
-              <CustomShapes
+              <MemoizedCustomShapes
                 enabled={true}
                 speed={
                   playgroundSettings.customShapes.speed *
@@ -606,7 +617,9 @@ export default function HeroSection() {
 
           {/* 3D Element Container */}
           <motion.div
-            className='h-[320px] sm:h-[380px] md:h-[450px] lg:h-[550px] w-full md:w-1/2 relative mt-6 md:mt-0'
+            className={`h-[320px] sm:h-[380px] md:h-[450px] lg:h-[550px] w-full md:w-1/2 relative mt-6 md:mt-0 ${
+              playgroundMode ? 'md:w-3/4 md:pr-4' : ''
+            }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 1 }}
@@ -625,7 +638,7 @@ export default function HeroSection() {
               <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
                 <ambientLight intensity={0.4} />{' '}
                 <directionalLight position={[10, 10, 5]} intensity={1.2} />
-                <MouseLight cursorPos={cursorPos} />
+                <MemoizedMouseLight cursorPos={cursorPos} />
                 <group
                   position={[0, 0, 0]}
                   rotation={[
@@ -634,7 +647,7 @@ export default function HeroSection() {
                     cursorPos.x * cursorPos.y * 0.03, // Add subtle twist based on both axes
                   ]}
                 >
-                  <AnimatedSphere
+                  <MemoizedAnimatedSphere
                     color={playgroundSettings.sphere.color}
                     emissive={playgroundSettings.sphere.emissive}
                     distort={
@@ -650,7 +663,7 @@ export default function HeroSection() {
                   />
                 </group>
                 {/* Pass cursor position to FloatingObjects */}
-                <FloatingObjects
+                <MemoizedFloatingObjects
                   visible={playgroundSettings.floatingObjects.visible}
                   speed={
                     playgroundSettings.floatingObjects.speed *
@@ -663,14 +676,14 @@ export default function HeroSection() {
               {/* Controls for CustomShapes */}
               {playgroundSettings.customShapes.enabled && (
                 <div className='absolute inset-0 z-[450]'>
-                  <CustomShapes
+                  <MemoizedCustomShapes
                     enabled={true}
                     speed={
                       playgroundSettings.customShapes.speed *
                       playgroundSettings.animation.speed
                     }
                     uiOnly={true}
-                    onSettingsClick={() => openControls()}
+                    onSettingsClick={handleSettingsClickForCustomShapes}
                   />
                 </div>
               )}
@@ -949,8 +962,8 @@ export default function HeroSection() {
         </AnimatePresence>
 
         {/* Controls Panel */}
-        {playgroundMode && (
-          <PlaygroundControls
+        {showControlPanel && (
+          <MemoizedPlaygroundControls
             initialSettings={playgroundSettings}
             onSettingsChange={handlePlaygroundSettingsChange}
             activeControlPoint={activeControlPoint}
@@ -960,6 +973,19 @@ export default function HeroSection() {
           />
         )}
       </section>
+
+      {/* Custom Shapes Control */}
+      {!showControlPanel && playgroundMode && (
+        <MemoizedCustomShapes
+          enabled={playgroundSettings.customShapes.enabled}
+          speed={
+            playgroundSettings.customShapes.speed *
+            playgroundSettings.animation.speed
+          }
+          standalone={true}
+          onSettingsClick={handleSettingsClickForCustomShapes}
+        />
+      )}
     </ShapesProvider>
   )
 }
