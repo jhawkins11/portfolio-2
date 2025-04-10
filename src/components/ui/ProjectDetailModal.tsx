@@ -38,11 +38,13 @@ export default function ProjectDetailModal({
 }: ProjectDetailModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = 'unset'
+    if (project) {
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = 'unset'
+      }
     }
-  }, [])
+  }, [project])
   if (!project) return null
 
   const prevImage = () => {

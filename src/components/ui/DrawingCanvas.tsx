@@ -495,6 +495,18 @@ export default function DrawingCanvas({
     drawCanvas()
   }, [paths, currentPath, strokeWidth, smoothMode, holeModeActive])
 
+  // Add body overflow control for help modal
+  useEffect(() => {
+    if (showHelp) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      if (showHelp) {
+        document.body.style.overflow = 'unset'
+      }
+    }
+  }, [showHelp])
+
   return (
     <div className='relative flex flex-col items-center'>
       {/* Show help overlay */}

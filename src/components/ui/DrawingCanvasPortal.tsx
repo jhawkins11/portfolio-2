@@ -28,12 +28,20 @@ export default function DrawingCanvasPortal({
   isOpen,
 }: DrawingCanvasPortalProps) {
   const [isMounted, setIsMounted] = useState(false)
+
   useEffect(() => {
     setIsMounted(true)
+
+    // Handle body overflow
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+
     return () => {
       setIsMounted(false)
+      document.body.style.overflow = 'unset'
     }
-  }, [])
+  }, [isOpen])
 
   // Early return if not mounted (SSR) or not open
   if (!isMounted || !isOpen) return null
