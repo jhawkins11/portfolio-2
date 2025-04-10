@@ -432,7 +432,7 @@ export default function HeroSection() {
                 penumbra={1}
               />
               <MemoizedCustomShapes
-                enabled={true}
+                enabled={playgroundSettings.customShapes.enabled}
                 speed={
                   playgroundSettings.customShapes.speed *
                   playgroundSettings.animation.speed
@@ -976,16 +976,38 @@ export default function HeroSection() {
 
       {/* Custom Shapes Control */}
       {!showControlPanel && playgroundMode && (
-        <MemoizedCustomShapes
-          enabled={playgroundSettings.customShapes.enabled}
-          speed={
-            playgroundSettings.customShapes.speed *
-            playgroundSettings.animation.speed
-          }
-          standalone={true}
-          onSettingsClick={handleSettingsClickForCustomShapes}
-        />
+        <div className='absolute inset-0 z-5 pointer-events-none'>
+          <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
+            <ambientLight intensity={0.6} />
+            <directionalLight position={[10, 10, 5]} intensity={1.5} />
+            <spotLight
+              position={[-10, -10, -5]}
+              intensity={1}
+              angle={0.4}
+              penumbra={1}
+            />
+            <MemoizedCustomShapes
+              enabled={playgroundSettings.customShapes.enabled}
+              speed={
+                playgroundSettings.customShapes.speed *
+                playgroundSettings.animation.speed
+              }
+              shapesOnly={true}
+            />
+          </Canvas>
+        </div>
       )}
+
+      {/* UI Controls for Custom Shapes */}
+      {!showControlPanel &&
+        playgroundMode &&
+        playgroundSettings.customShapes.enabled && (
+          <MemoizedCustomShapes
+            enabled={true}
+            uiOnly={true}
+            onSettingsClick={handleSettingsClickForCustomShapes}
+          />
+        )}
     </ShapesProvider>
   )
 }

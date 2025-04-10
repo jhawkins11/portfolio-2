@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { FiPlus, FiTool } from 'react-icons/fi'
 import { useFrame } from '@react-three/fiber'
 import dynamic from 'next/dynamic'
+import { Canvas } from '@react-three/fiber'
 
 // Dynamic import for ShapeGenerator
 const ShapeGenerator = dynamic(() => import('./ShapeGenerator'), {
@@ -473,17 +474,29 @@ export default function CustomShapes({
     return <ShapesRenderer shapes={shapes} speed={speed} />
   }
 
-  // Render both in standalone mode
+  // Render both in standalone mode - wrap in Canvas when in standalone
   if (standalone) {
     return (
       <ShapesProvider>
-        <ShapesRenderer shapes={shapes} speed={speed} />
+        <div className='absolute inset-0 z-5 pointer-events-none'>
+          <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
+            <ambientLight intensity={0.6} />
+            <directionalLight position={[10, 10, 5]} intensity={1.5} />
+            <spotLight
+              position={[-10, -10, -5]}
+              intensity={1}
+              angle={0.4}
+              penumbra={1}
+            />
+            <ShapesRenderer shapes={shapes} speed={speed} />
+          </Canvas>
+        </div>
         <ShapesControls onSettingsClick={onSettingsClick} />
       </ShapesProvider>
     )
   }
 
-  // Default rendering
+  // Default rendering - ensure ShapesRenderer is always inside Canvas
   return (
     <>
       <ShapesRenderer shapes={shapes} speed={speed} />
