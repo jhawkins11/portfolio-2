@@ -6,13 +6,13 @@ import { motion } from 'framer-motion'
 import { FiGithub, FiLinkedin, FiMail, FiMenu, FiX } from 'react-icons/fi'
 
 const navLinks = [
-  { href: '#hero', label: 'Home' },
-  { href: '#about', label: 'About' },
-  { href: '#experience', label: 'Experience' },
-  { href: '#projects', label: 'Projects' },
-  { href: '#skills', label: 'Skills' },
-  { href: '#github-activity', label: 'Contributions' },
-  { href: '#contact', label: 'Contact' },
+  { href: '#hero', label: 'Home', priority: 'high' },
+  { href: '#about', label: 'About', priority: 'high' },
+  { href: '#experience', label: 'Experience', priority: 'high' },
+  { href: '#projects', label: 'Projects', priority: 'high' },
+  { href: '#skills', label: 'Skills', priority: 'low' },
+  { href: '#github-activity', label: 'Contributions', priority: 'low' },
+  { href: '#contact', label: 'Contact', priority: 'high' },
 ]
 
 const socialLinks = [
@@ -124,6 +124,7 @@ export default function Navbar() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
+              className={`${link.priority === 'low' ? 'hidden lg:block' : ''}`}
             >
               <Link
                 href={link.href}

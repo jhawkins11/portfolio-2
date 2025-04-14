@@ -379,7 +379,7 @@ export default function HeroSection() {
     <ShapesProvider>
       <section
         id='hero'
-        className='min-h-screen relative overflow-hidden flex items-center justify-center hero-section pt-12 sm:pt-16'
+        className='min-h-[100vh] relative overflow-hidden flex items-start sm:items-center justify-center hero-section pt-24'
         ref={containerRef}
       >
         {/* Background Blobs */}
@@ -444,10 +444,10 @@ export default function HeroSection() {
         )}
 
         {/* Content Container */}
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8 z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 lg:gap-16'>
+        <div className='container mx-auto px-4 sm:px-6 lg:px-8 z-10 flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 lg:gap-16'>
           {/* Text content */}
           <motion.div
-            className='flex flex-col justify-center w-full md:w-1/2 md:pr-4 lg:pr-8 space-y-4 sm:space-y-6 md:space-y-8'
+            className='flex flex-col justify-center w-full lg:w-1/2 lg:pr-4 lg:pr-8 space-y-4 sm:space-y-6 md:space-y-8'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
@@ -460,7 +460,7 @@ export default function HeroSection() {
               className='relative inline-flex items-center gap-3'
             >
               <div className='w-8 md:w-12 h-[2px] md:h-[3px] bg-gradient-to-r from-primary to-accent rounded-full'></div>
-              <span className='text-base md:text-lg lg:text-xl font-medium text-foreground/90'>
+              <span className='text-base md:text-lg lg:text-lg font-medium text-foreground/90'>
                 Hello, I&apos;m
               </span>
             </motion.div>
@@ -468,7 +468,7 @@ export default function HeroSection() {
             {/* Name */}
             <div className='relative'>
               <motion.h1
-                className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl h-screen:text-6xl font-bold tracking-tight relative inline-flex flex-col gap-1 sm:gap-2'
+                className='text-5xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl h-screen:text-6xl font-bold tracking-tight relative inline-flex flex-col gap-1 sm:gap-2'
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -505,14 +505,14 @@ export default function HeroSection() {
               className='relative'
             >
               <div className='absolute left-0 top-0 bottom-0 w-1 md:w-1.5 bg-gradient-to-b from-primary/80 to-accent/80 rounded-full'></div>
-              <h2 className='text-2xl sm:text-3xl md:text-4xl lg:text-5xl h-screen:text-2xl font-bold text-foreground/90 pl-3 md:pl-4'>
+              <h2 className='text-3xl sm:text-3xl md:text-4xl lg:text-4xl h-screen:text-2xl font-bold text-foreground/90 pl-3 md:pl-4'>
                 Full Stack Developer
               </h2>
             </motion.div>
 
             {/* Description */}
             <motion.p
-              className='text-base sm:text-lg md:text-xl text-foreground/90 max-w-[90%] sm:max-w-md md:max-w-lg leading-relaxed'
+              className='text-lg sm:text-lg md:text-xl lg:text-xl text-foreground/90 max-w-[95%] sm:max-w-md md:max-w-lg leading-relaxed'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
@@ -617,8 +617,8 @@ export default function HeroSection() {
 
           {/* 3D Element Container */}
           <motion.div
-            className={`h-[300px] sm:h-[350px] md:h-[450px] lg:h-[550px] w-full md:w-1/2 relative ${
-              playgroundMode ? 'md:w-3/4 md:pr-4' : ''
+            className={`h-[300px] sm:h-[350px] md:h-[450px] lg:h-[550px] w-full lg:w-1/2 relative ${
+              playgroundMode ? 'lg:w-3/4 lg:pr-4' : ''
             }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -752,7 +752,7 @@ export default function HeroSection() {
             {/* Code snippets */}
             {/* Code Snippet 1: Skills */}
             <motion.div
-              className='hidden md:block absolute top-6 sm:top-12 md:top-16 lg:top-20 -right-14 sm:-right-10 md:right-2 lg:right-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(124,58,237,0.15)] hover:shadow-[0_0_25px_rgba(124,58,237,0.25)] transform rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
+              className='hidden lg:block absolute top-6 sm:top-12 md:top-16 lg:top-20 -right-14 sm:-right-10 md:right-2 lg:right-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(124,58,237,0.15)] hover:shadow-[0_0_25px_rgba(124,58,237,0.25)] transform rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
               aria-hidden='true'
               initial={{ opacity: 0, x: 50, rotate: 5 }}
               animate={{
@@ -804,7 +804,7 @@ export default function HeroSection() {
 
             {/* Code Snippet 2: Experience */}
             <motion.div
-              className='hidden md:block absolute -bottom-14 sm:-bottom-10 md:-bottom-6 lg:bottom-4 -left-14 sm:-left-10 md:left-2 lg:left-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(56,189,248,0.15)] hover:shadow-[0_0_25px_rgba(56,189,248,0.25)] transform -rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
+              className='hidden lg:block absolute -bottom-14 sm:-bottom-10 md:-bottom-6 lg:bottom-4 -left-14 sm:-left-10 md:left-2 lg:left-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(56,189,248,0.15)] hover:shadow-[0_0_25px_rgba(56,189,248,0.25)] transform -rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
               aria-hidden='true'
               initial={{ opacity: 0, x: -50, rotate: -5 }}
               animate={{
