@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 
+// Rate Limiting Setup
+const ipRequestCounts = new Map<string, { count: number; timestamp: number }>()
+const RATE_LIMIT_WINDOW_MS = 60 * 1000 // 1 minute window
+const RATE_LIMIT_MAX_REQUESTS = 2 // Max 2 requests per window per IP
+
 // Email validation regex
 const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
 
@@ -13,6 +18,47 @@ interface ContactFormData {
 }
 
 export async function POST(request: NextRequest) {
+  // --- Apply Rate Limiting ---
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0] ??
+    request.headers.get('x-real-ip') ??
+    'unknown'
+
+  if (ip !== 'unknown') {
+    const now = Date.now()
+    const record = ipRequestCounts.get(ip)
+
+    if (record) {
+      // Check if the time window has passed
+      if (now - record.timestamp > RATE_LIMIT_WINDOW_MS) {
+        // Reset count if window expired
+        ipRequestCounts.set(ip, { count: 1, timestamp: now })
+      } else {
+        // Increment count if within window
+        record.count++
+        // Check if limit exceeded
+        if (record.count > RATE_LIMIT_MAX_REQUESTS) {
+          console.warn(`Rate limit exceeded for IP: ${ip}`)
+          return NextResponse.json(
+            { error: 'Too many requests. Please try again later.' },
+            { status: 429 }
+          )
+        }
+        // Update the record (count incremented, timestamp remains the start of the window)
+        ipRequestCounts.set(ip, {
+          count: record.count,
+          timestamp: record.timestamp,
+        })
+      }
+    } else {
+      // First request from this IP in a while
+      ipRequestCounts.set(ip, { count: 1, timestamp: now })
+    }
+  } else {
+    // Log warning for unknown IPs but allow request to proceed
+    console.warn('Rate limiting skipped: Could not determine IP address.')
+  }
+
   try {
     // Parse the request body
     const body = await request.json()
