@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, useEffect } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 
@@ -96,6 +96,42 @@ export default function ShapeGenerator({
   entranceEffect = 'fade',
 }: ShapeGeneratorProps) {
   const meshRef = useRef<THREE.Mesh>(null)
+
+  // Add cleanup logic
+  useEffect(() => {
+    return () => {
+      if (meshRef.current) {
+        // Dispose geometry
+        const geometry = meshRef.current.geometry
+        if (geometry) {
+          geometry.dispose()
+        }
+
+        // Dispose materials
+        const material = meshRef.current.material
+        if (material) {
+          if (Array.isArray(material)) {
+            material.forEach((mat) => {
+              if (mat instanceof THREE.Material) {
+                if (mat instanceof THREE.MeshStandardMaterial && mat.map) {
+                  mat.map.dispose()
+                }
+                mat.dispose()
+              }
+            })
+          } else if (material instanceof THREE.Material) {
+            if (
+              material instanceof THREE.MeshStandardMaterial &&
+              material.map
+            ) {
+              material.map.dispose()
+            }
+            material.dispose()
+          }
+        }
+      }
+    }
+  }, [])
 
   // Log shape generation
   console.log('ShapeGenerator: Generating shape with', {
