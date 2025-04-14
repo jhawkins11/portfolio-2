@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Roboto_Mono, Poppins } from 'next/font/google'
 import './globals.css'
 import Providers from './providers'
+import AppErrorBoundary from '@/components/ErrorBoundary'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -78,7 +79,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${robotoMono.variable} ${poppins.variable} font-sans antialiased bg-gradient-to-br from-base-100 to-base-200 min-h-screen`}
       >
-        <Providers>{children}</Providers>
+        <AppErrorBoundary>
+          <Providers>{children}</Providers>
+        </AppErrorBoundary>
       </body>
     </html>
   )
