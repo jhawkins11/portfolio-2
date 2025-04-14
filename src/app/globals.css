@@ -95,7 +95,7 @@
   }
 
   .button-primary {
-    @apply relative bg-primary text-white px-6 py-3 rounded-md overflow-hidden shadow-md transition-all duration-300 hover:bg-primary/90 hover:shadow-lg hover:translate-y-[-2px];
+    @apply relative bg-primary text-white px-6 py-3 sm:px-8 sm:py-3.5 rounded-md overflow-hidden shadow-md transition-all duration-300 hover:bg-primary/90 hover:shadow-lg hover:translate-y-[-2px] min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
 
   .button-primary::after {
@@ -108,7 +108,7 @@
   }
 
   .button-secondary {
-    @apply relative bg-background text-foreground border border-white/10 px-6 py-3 rounded-md overflow-hidden shadow-md backdrop-blur-sm transition-all duration-300 hover:bg-white/5 hover:shadow-lg;
+    @apply relative bg-background text-foreground border border-white/10 px-6 py-3 sm:px-8 sm:py-3.5 rounded-md overflow-hidden shadow-md backdrop-blur-sm transition-all duration-300 hover:bg-white/5 hover:shadow-lg min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
 
   .blob {

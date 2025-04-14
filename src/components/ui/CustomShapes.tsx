@@ -2,7 +2,7 @@
 
 import { useState, createContext, useContext, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { FiPlus, FiTool } from 'react-icons/fi'
+import { FiPlus, FiTool, FiTrash2 } from 'react-icons/fi'
 import { useFrame } from '@react-three/fiber'
 import dynamic from 'next/dynamic'
 import { Canvas } from '@react-three/fiber'
@@ -382,21 +382,19 @@ function ShapesControls({
 
   return (
     <div className='fixed z-[450]'>
-      {/* Use Portal for drawing canvas overlay */}
       <DrawingCanvasPortal
         isOpen={showDrawingCanvas}
         onClose={() => setShowDrawingCanvas(false)}
         onShapeCreated={handleShapeCreated}
       />
 
-      {/* Action buttons */}
-      <div className='fixed bottom-5 right-5 z-[450] flex flex-row space-x-2'>
+      <div className='fixed bottom-5 right-5 z-[450] flex flex-col-reverse sm:flex-row gap-2 sm:space-x-2'>
         {shapes.length > 0 && (
           <motion.button
             onClick={clearShapes}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className='bg-gradient-to-r from-red-500/80 to-orange-600/80 hover:from-red-500/90 hover:to-orange-600/90 text-white px-3 py-2 rounded-full shadow-lg relative overflow-hidden group'
+            className='bg-gradient-to-r from-red-500/80 to-orange-600/80 hover:from-red-500/90 hover:to-orange-600/90 text-white px-3 py-2 rounded-full shadow-lg relative overflow-hidden group hidden sm:inline-flex'
           >
             <span className='relative z-10 text-sm font-medium'>
               Clear All ({shapes.length})
@@ -410,21 +408,35 @@ function ShapesControls({
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           className='bg-gradient-to-r from-emerald-500/80 to-teal-600/80 hover:from-emerald-500/90 hover:to-teal-600/90 text-white p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-lg relative overflow-hidden group'
+          aria-label='Add shape'
         >
           <FiPlus className='w-5 h-5 relative z-10' />
           <div className='absolute -inset-0.5 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-200'></div>
         </motion.button>
 
-        {/* Settings button */}
         {onSettingsClick && (
           <motion.button
             onClick={onSettingsClick}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className='bg-gradient-to-r from-purple-500/80 to-pink-600/80 hover:from-purple-500/90 hover:to-pink-600/90 text-white p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-lg relative overflow-hidden group'
+            className='bg-gradient-to-r from-purple-500/80 to-pink-600/80 hover:from-purple-500/90 hover:to-pink-600/90 text-white p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-lg relative overflow-hidden group mb-2 sm:mb-0'
+            aria-label='Settings'
           >
             <FiTool className='w-5 h-5 relative z-10' />
             <div className='absolute -inset-0.5 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-200'></div>
+          </motion.button>
+        )}
+
+        {shapes.length > 0 && (
+          <motion.button
+            onClick={clearShapes}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className='bg-gradient-to-r from-red-500/80 to-orange-600/80 hover:from-red-500/90 hover:to-orange-600/90 text-white p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-lg relative overflow-hidden group sm:hidden'
+            aria-label='Clear all shapes'
+          >
+            <FiTrash2 className='w-5 h-5 relative z-10' />
+            <div className='absolute -inset-0.5 bg-gradient-to-r from-red-400 to-orange-500 rounded-full blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-200'></div>
           </motion.button>
         )}
       </div>

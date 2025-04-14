@@ -444,10 +444,10 @@ export default function HeroSection() {
         )}
 
         {/* Content Container */}
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8 z-10 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 md:gap-8 lg:gap-12'>
+        <div className='container mx-auto px-4 sm:px-6 lg:px-8 z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 lg:gap-16'>
           {/* Text content */}
           <motion.div
-            className='flex flex-col justify-center w-full md:w-1/2 md:pr-4 lg:pr-8'
+            className='flex flex-col justify-center w-full md:w-1/2 md:pr-4 lg:pr-8 space-y-4 sm:space-y-6 md:space-y-8'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
@@ -457,10 +457,10 @@ export default function HeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.8 }}
-              className='relative inline-flex items-center gap-3 mb-2 md:mb-4'
+              className='relative inline-flex items-center gap-3'
             >
               <div className='w-8 md:w-12 h-[2px] md:h-[3px] bg-gradient-to-r from-primary to-accent rounded-full'></div>
-              <span className='text-base md:text-lg font-medium text-foreground/80'>
+              <span className='text-base md:text-lg lg:text-xl font-medium text-foreground/90'>
                 Hello, I&apos;m
               </span>
             </motion.div>
@@ -468,7 +468,7 @@ export default function HeroSection() {
             {/* Name */}
             <div className='relative'>
               <motion.h1
-                className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl h-screen:text-5xl font-bold mb-2 md:mb-3 tracking-tight relative inline-flex flex-col'
+                className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl h-screen:text-6xl font-bold tracking-tight relative inline-flex flex-col gap-1 sm:gap-2'
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -502,17 +502,17 @@ export default function HeroSection() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
-              className='relative mb-4 sm:mb-6'
+              className='relative'
             >
               <div className='absolute left-0 top-0 bottom-0 w-1 md:w-1.5 bg-gradient-to-b from-primary/80 to-accent/80 rounded-full'></div>
-              <h2 className='text-lg sm:text-xl md:text-2xl lg:text-3xl h-screen:text-xl font-bold text-foreground/90 pl-3 md:pl-4'>
+              <h2 className='text-2xl sm:text-3xl md:text-4xl lg:text-5xl h-screen:text-2xl font-bold text-foreground/90 pl-3 md:pl-4'>
                 Full Stack Developer
               </h2>
             </motion.div>
 
             {/* Description */}
             <motion.p
-              className='text-xs sm:text-sm md:text-base h-screen:text-sm text-foreground/80 max-w-lg mb-4 sm:mb-6 leading-relaxed'
+              className='text-base sm:text-lg md:text-xl text-foreground/90 max-w-[90%] sm:max-w-md md:max-w-lg leading-relaxed'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
@@ -524,21 +524,21 @@ export default function HeroSection() {
 
             {/* Buttons */}
             <motion.div
-              className='flex flex-wrap gap-2 sm:gap-3 md:gap-4'
+              className='flex flex-wrap gap-3 sm:gap-4 md:gap-5 pt-2 sm:pt-4'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.8 }}
             >
               <a
                 href='#contact'
-                className='button-primary text-xs sm:text-sm group relative overflow-hidden py-2 px-3 md:py-3 md:px-4'
+                className='button-primary text-sm sm:text-base inline-flex items-center justify-center'
               >
                 <span className='relative z-10'>Get in touch</span>
                 <div className='absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-0 group-hover:opacity-20 transition-opacity duration-300 group-hover:animate-shine'></div>
               </a>
               <a
                 href='#projects'
-                className='button-secondary text-xs sm:text-sm group relative overflow-hidden py-2 px-3 md:py-3 md:px-4'
+                className='button-secondary text-sm sm:text-base inline-flex items-center justify-center'
               >
                 <span className='relative z-10'>View my work</span>
                 <div className='absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover:animate-shine'></div>
@@ -547,7 +547,7 @@ export default function HeroSection() {
 
             {/* Tech stack icons */}
             <motion.div
-              className='mt-4 sm:mt-6 md:mt-8 relative'
+              className='relative pt-4 sm:pt-6 md:pt-8'
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9, duration: 1 }}
@@ -617,7 +617,7 @@ export default function HeroSection() {
 
           {/* 3D Element Container */}
           <motion.div
-            className={`h-[320px] sm:h-[380px] md:h-[450px] lg:h-[550px] w-full md:w-1/2 relative mt-6 md:mt-0 ${
+            className={`h-[300px] sm:h-[350px] md:h-[450px] lg:h-[550px] w-full md:w-1/2 relative ${
               playgroundMode ? 'md:w-3/4 md:pr-4' : ''
             }`}
             initial={{ opacity: 0 }}
@@ -752,7 +752,7 @@ export default function HeroSection() {
             {/* Code snippets */}
             {/* Code Snippet 1: Skills */}
             <motion.div
-              className='absolute top-6 sm:top-12 md:top-16 lg:top-20 -right-14 sm:-right-10 md:right-2 lg:right-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(124,58,237,0.15)] hover:shadow-[0_0_25px_rgba(124,58,237,0.25)] transform rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
+              className='hidden md:block absolute top-6 sm:top-12 md:top-16 lg:top-20 -right-14 sm:-right-10 md:right-2 lg:right-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(124,58,237,0.15)] hover:shadow-[0_0_25px_rgba(124,58,237,0.25)] transform rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
               aria-hidden='true'
               initial={{ opacity: 0, x: 50, rotate: 5 }}
               animate={{
@@ -804,7 +804,7 @@ export default function HeroSection() {
 
             {/* Code Snippet 2: Experience */}
             <motion.div
-              className='absolute -bottom-14 sm:-bottom-10 md:-bottom-6 lg:bottom-4 -left-14 sm:-left-10 md:left-2 lg:left-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(56,189,248,0.15)] hover:shadow-[0_0_25px_rgba(56,189,248,0.25)] transform -rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
+              className='hidden md:block absolute -bottom-14 sm:-bottom-10 md:-bottom-6 lg:bottom-4 -left-14 sm:-left-10 md:left-2 lg:left-10 bg-[#1a1a26]/85 backdrop-blur-md border border-white/10 rounded-lg shadow-[0_0_18px_rgba(56,189,248,0.15)] hover:shadow-[0_0_25px_rgba(56,189,248,0.25)] transform -rotate-2 z-30 w-[190px] sm:w-[220px] md:w-[240px] lg:w-[260px] overflow-hidden'
               aria-hidden='true'
               initial={{ opacity: 0, x: -50, rotate: -5 }}
               animate={{
@@ -855,17 +855,17 @@ export default function HeroSection() {
 
         {/* Scroll indicator */}
         <motion.div
-          className='absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center'
+          className='absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center'
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5, duration: 0.8 }}
         >
-          <span className='text-[10px] sm:text-xs font-medium text-foreground/60 uppercase tracking-wider mb-1 sm:mb-2'>
+          <span className='text-[10px] sm:text-xs font-medium text-foreground/80 uppercase tracking-wider mb-1 sm:mb-2'>
             Scroll to explore
           </span>
-          <div className='w-4 h-6 sm:w-5 sm:h-8 md:w-6 md:h-10 border-2 border-foreground/20 rounded-full flex justify-center p-1'>
+          <div className='w-4 h-6 sm:w-5 sm:h-8 md:w-6 md:h-10 border-2 border-foreground/40 rounded-full flex justify-center p-1'>
             <motion.div
-              className='w-1 h-1 sm:w-1.5 sm:h-1.5 bg-foreground/60 rounded-full'
+              className='w-1 h-1 sm:w-1.5 sm:h-1.5 bg-foreground/80 rounded-full'
               animate={{
                 y: [0, 10, 0],
               }}
