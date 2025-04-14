@@ -1,21 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import { z } from 'zod'
 
 // Rate Limiting Setup
 const ipRequestCounts = new Map<string, { count: number; timestamp: number }>()
 const RATE_LIMIT_WINDOW_MS = 60 * 1000 // 1 minute window
 const RATE_LIMIT_MAX_REQUESTS = 2 // Max 2 requests per window per IP
 
-// Email validation regex
-const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
-
-// Schema validation for form data
-interface ContactFormData {
-  name: string
-  email: string
-  subject: string
-  message: string
-}
+const contactFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Name must be at least 2 characters long' })
+    .max(100, { message: 'Name must be no more than 100 characters' })
+    .refine((val) => !/[<>]/.test(val), {
+      message: 'Name contains invalid characters',
+    }),
+  email: z
+    .string()
+    .trim()
+    .email({ message: 'Invalid email address' })
+    .max(254, { message: 'Email must be no more than 254 characters' }),
+  subject: z
+    .string()
+    .trim()
+    .min(3, { message: 'Subject must be at least 3 characters long' })
+    .max(150, { message: 'Subject must be no more than 150 characters' })
+    .refine((val) => !/[<>]/.test(val), {
+      message: 'Subject contains invalid characters',
+    }),
+  message: z
+    .string()
+    .trim()
+    .min(10, { message: 'Message must be at least 10 characters long' })
+    .max(5000, { message: 'Message must be no more than 5000 characters' })
+    .refine((val) => !/(<script|javascript:)/i.test(val), {
+      message: 'Message contains potentially unsafe content',
+    }),
+})
 
 export async function POST(request: NextRequest) {
   // --- Apply Rate Limiting ---
@@ -63,23 +85,27 @@ export async function POST(request: NextRequest) {
     // Parse the request body
     const body = await request.json()
 
-    // Validate required fields
-    const { name, email, subject, message } = body as ContactFormData
+    const validationResult = contactFormSchema.safeParse(body)
 
-    if (!name || !email || !subject || !message) {
+    if (!validationResult.success) {
+      console.warn(
+        'Contact form validation failed:',
+        validationResult.error.flatten()
+      )
       return NextResponse.json(
-        { error: 'All fields are required' },
+        {
+          error: 'Invalid form data provided',
+          issues: validationResult.error.flatten().fieldErrors,
+          details: validationResult.error.errors.map((err) => ({
+            field: err.path.join('.'),
+            message: err.message,
+          })),
+        },
         { status: 400 }
       )
     }
 
-    // Validate email format
-    if (!EMAIL_REGEX.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email address' },
-        { status: 400 }
-      )
-    }
+    const { name, email, subject, message } = validationResult.data
 
     // Configure Nodemailer transporter
     let transporter
@@ -168,6 +194,12 @@ ${message}
       )
     }
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { error: 'Invalid JSON format in request body' },
+        { status: 400 }
+      )
+    }
     console.error('Contact API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
