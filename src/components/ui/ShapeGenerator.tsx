@@ -133,16 +133,6 @@ export default function ShapeGenerator({
     }
   }, [])
 
-  // Log shape generation
-  console.log('ShapeGenerator: Generating shape with', {
-    points: points.length,
-    holes: holes.length,
-    materialType,
-    position,
-    entranceProgress,
-    entranceEffect,
-  })
-
   // Calculate base scale from position
   const baseScale = position[2] < -3 ? 0.85 : position[2] < -1 ? 0.75 : 0.65
 
@@ -234,9 +224,9 @@ export default function ShapeGenerator({
           steps: 4,
           depth: height * 1.8,
           bevelEnabled: true,
-          bevelThickness: 0.1,
-          bevelSize: 0.15,
-          bevelSegments: 10,
+          bevelThickness: 0.05,
+          bevelSize: 0.05,
+          bevelSegments: 5,
           bevelOffset: 0,
           curveSegments: 32,
         }

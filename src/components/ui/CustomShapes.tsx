@@ -118,72 +118,72 @@ const getShapePosition = (): [number, number, number] => {
   // Expanded set of positions that work well visually (x, y, z)
   const predefinedPositions: [number, number, number][] = [
     // Far left positions
-    [-6.0, 3.5, -4.0],
-    [-5.8, 1.8, -3.5],
-    [-5.5, -1.5, -3.0],
-    [-5.2, -3.0, -4.0],
+    [-6.0, 3.5, -1.0],
+    [-5.8, 1.8, -0.5],
+    [-5.5, -1.5, 0],
+    [-5.2, -3.0, -1.0],
 
     // Left positions
-    [-4.2, 4.0, -3.0],
-    [-3.8, 2.5, -2.5],
-    [-3.5, 0.8, -2.0],
-    [-3.7, -2.2, -3.0],
-    [-4.0, -3.5, -4.0],
+    [-4.2, 4.0, 0.5],
+    [-3.8, 2.5, 0],
+    [-3.5, 0.8, 0.8],
+    [-3.7, -2.2, -0.2],
+    [-4.0, -3.5, -0.8],
 
     // Left-center positions
-    [-2.6, 3.3, -2.5],
-    [-2.3, 1.4, -3.5],
-    [-2.5, -0.8, -2.8],
-    [-2.0, -2.8, -3.0],
+    [-2.6, 3.3, 0.2],
+    [-2.3, 1.4, -0.7],
+    [-2.5, -0.8, 0.4],
+    [-2.0, -2.8, -0.1],
 
     // Center-left positions (spaced out from center)
-    [-1.5, 3.0, -2.0],
-    [-1.3, 1.0, -3.0],
-    [-1.2, -1.0, -2.5],
-    [-1.4, -3.0, -3.5],
+    [-1.5, 3.0, 1.0],
+    [-1.3, 1.0, -0.3],
+    [-1.2, -1.0, 0.6],
+    [-1.4, -3.0, -0.6],
 
     // Center-right positions (spaced out from center)
-    [1.5, 3.0, -2.0],
-    [1.3, 1.0, -3.0],
-    [1.2, -1.0, -2.5],
-    [1.4, -3.0, -3.5],
+    [1.5, 3.0, 1.0],
+    [1.3, 1.0, -0.3],
+    [1.2, -1.0, 0.6],
+    [1.4, -3.0, -0.6],
 
     // Right-center positions
-    [2.6, 3.3, -2.5],
-    [2.3, 1.4, -3.5],
-    [2.5, -0.8, -2.8],
-    [2.0, -2.8, -3.0],
+    [2.6, 3.3, 0.2],
+    [2.3, 1.4, -0.7],
+    [2.5, -0.8, 0.4],
+    [2.0, -2.8, -0.1],
 
     // Right positions
-    [4.2, 4.0, -3.0],
-    [3.8, 2.5, -2.5],
-    [3.5, 0.8, -2.0],
-    [3.7, -2.2, -3.0],
-    [4.0, -3.5, -4.0],
+    [4.2, 4.0, 0.5],
+    [3.8, 2.5, 0],
+    [3.5, 0.8, 0.8],
+    [3.7, -2.2, -0.2],
+    [4.0, -3.5, -0.8],
 
     // Far right positions
-    [6.0, 3.5, -4.0],
-    [5.8, 1.8, -3.5],
-    [5.5, -1.5, -3.0],
-    [5.2, -3.0, -4.0],
+    [6.0, 3.5, -1.0],
+    [5.8, 1.8, -0.5],
+    [5.5, -1.5, 0],
+    [5.2, -3.0, -1.0],
 
     // Extreme positions for more diversity
-    [7.0, 2.0, -5.5],
-    [6.5, -2.0, -5.0],
-    [-7.0, 2.0, -5.5],
-    [-6.5, -2.0, -5.0],
-    [0, 6.0, -6.0],
-    [0, -6.0, -6.0],
+    [7.0, 2.0, -0.5],
+    [6.5, -2.0, 0],
+    [-7.0, 2.0, -0.5],
+    [-6.5, -2.0, 0],
+    [0, 6.0, -1.0],
+    [0, -6.0, -1.0],
 
     // Foreground positions (closer to camera)
-    [2.0, 1.0, -0.5],
-    [-2.0, -1.0, -0.5],
-    [1.2, -1.2, -0.3],
-    [-1.2, 1.2, -0.3],
-    [3.0, 0.0, -0.8],
-    [-3.0, 0.0, -0.8],
-    [0, 2.5, -0.6],
-    [0, -2.5, -0.6],
+    [2.0, 1.0, 0.5],
+    [-2.0, -1.0, 0.5],
+    [1.2, -1.2, 0.7],
+    [-1.2, 1.2, 0.7],
+    [3.0, 0.0, 0.2],
+    [-3.0, 0.0, 0.2],
+    [0, 2.5, 0.4],
+    [0, -2.5, 0.4],
   ]
 
   // Find available positions
@@ -394,7 +394,7 @@ function ShapesControls({
             onClick={clearShapes}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className='bg-gradient-to-r from-red-500/80 to-orange-600/80 hover:from-red-500/90 hover:to-orange-600/90 text-white px-3 py-2 rounded-full shadow-lg relative overflow-hidden group hidden sm:inline-flex'
+            className='bg-gradient-to-r from-red-500/80 to-orange-600/80 hover:from-red-500/90 hover:to-orange-600/90 text-white px-3 py-2 rounded-full shadow-lg relative overflow-hidden group hidden sm:inline-flex items-center justify-center'
           >
             <span className='relative z-10 text-sm font-medium'>
               Clear All ({shapes.length})
