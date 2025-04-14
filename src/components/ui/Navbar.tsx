@@ -11,6 +11,7 @@ const navLinks = [
   { href: '#experience', label: 'Experience' },
   { href: '#projects', label: 'Projects' },
   { href: '#skills', label: 'Skills' },
+  { href: '#github-activity', label: 'Contributions' },
   { href: '#contact', label: 'Contact' },
 ]
 
@@ -23,6 +24,27 @@ const socialLinks = [
   },
   { href: 'mailto:josiah.c.hawkins@gmail.com', label: 'Email', icon: FiMail },
 ]
+
+const scrollToSection = (
+  e: React.MouseEvent<HTMLAnchorElement>,
+  href: string
+) => {
+  e.preventDefault()
+  const targetId = href.replace('#', '')
+  const element = document.getElementById(targetId)
+  if (element) {
+    const offset = 80
+    const bodyRect = document.body.getBoundingClientRect().top
+    const elementRect = element.getBoundingClientRect().top
+    const elementPosition = elementRect - bodyRect
+    const offsetPosition = elementPosition - offset
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth',
+    })
+  }
+}
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -110,6 +132,7 @@ export default function Navbar() {
                     ? 'text-primary'
                     : 'text-foreground/70 hover:text-foreground'
                 }`}
+                onClick={(e) => scrollToSection(e, link.href)}
               >
                 {link.label}
                 {activeSection === link.href && (
@@ -178,7 +201,10 @@ export default function Navbar() {
                   ? 'bg-primary/10 text-primary'
                   : 'hover:bg-background/80 text-foreground/70 hover:text-foreground'
               }`}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={(e) => {
+                setMobileMenuOpen(false)
+                scrollToSection(e, link.href)
+              }}
             >
               {link.label}
               {activeSection === link.href && (
