@@ -3,6 +3,7 @@
 import { useRef, useMemo, useEffect } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
+import { detectShapeType } from '@/utils/shapeUtils'
 
 type Point = {
   x: number
@@ -19,69 +20,6 @@ type ShapeGeneratorProps = {
   materialType?: string
   entranceProgress?: number
   entranceEffect?: string
-}
-
-// Enhanced helper function to check if a shape is approximately circular
-function isCircular(points: Point[]): { isCircle: boolean; radius: number } {
-  if (points.length < 8) {
-    return { isCircle: false, radius: 0 }
-  }
-
-  // Calculate center point (average of all points)
-  const center = points.reduce(
-    (acc, p) => ({
-      x: acc.x + p.x / points.length,
-      y: acc.y + p.y / points.length,
-    }),
-    { x: 0, y: 0 }
-  )
-
-  // Calculate the distance of each point from the center
-  const radii = points.map((p) =>
-    Math.sqrt(Math.pow(p.x - center.x, 2) + Math.pow(p.y - center.y, 2))
-  )
-
-  // Calculate average radius
-  const avgRadius = radii.reduce((sum, r) => sum + r, 0) / radii.length
-
-  // Check if all points are roughly the same distance from center (within 12% tolerance - tighter than before)
-  const tolerance = 0.12
-  const isCircle = radii.every(
-    (r) => Math.abs(r - avgRadius) / avgRadius < tolerance
-  )
-
-  return { isCircle, radius: avgRadius }
-}
-
-// Function to check if a shape should be rendered as a 3D sphere or a rounded box
-function detectShapeType(points: Point[]): { type: string; radius: number } {
-  const { isCircle, radius } = isCircular(points)
-
-  if (isCircle) {
-    return { type: 'sphere', radius }
-  }
-
-  // For other shapes, check if they're close to a regular polygon
-  // Calculate bounding box
-  const minX = Math.min(...points.map((p) => p.x))
-  const maxX = Math.max(...points.map((p) => p.x))
-  const minY = Math.min(...points.map((p) => p.y))
-  const maxY = Math.max(...points.map((p) => p.y))
-
-  const width = maxX - minX
-  const height = maxY - minY
-
-  // Check if it's roughly square-shaped (width and height similar)
-  if (Math.abs(width - height) / Math.max(width, height) < 0.2) {
-    // It's square-like, but we'll only return 'box' for specific cases
-    // This ensures most shapes use extrusion instead of becoming boxes
-    if (points.length < 12) {
-      return { type: 'extrude', radius }
-    }
-    return { type: 'box', radius }
-  }
-
-  return { type: 'extrude', radius }
 }
 
 export default function ShapeGenerator({

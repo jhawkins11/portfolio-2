@@ -372,7 +372,7 @@ export default function DrawingCanvas({
       </div>
 
       {/* Material Selection Menu (Conditional Render) */}
-      <div className='mb-2 pb-2 w-full flex justify-center min-h-[180px]'>
+      <div className='mb-2 pb-2 w-full flex justify-center'>
         {' '}
         {/* Reserve space */}
         {showMaterialMenu && (
