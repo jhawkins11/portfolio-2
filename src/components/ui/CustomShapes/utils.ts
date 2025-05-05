@@ -1,5 +1,6 @@
-// Track which positions have been used to avoid duplicates
-let usedPositionIndices: number[] = []
+// Track which positions have been used to avoid duplicates for each view mode
+let usedDesktopIndices: number[] = []
+let usedMobileIndices: number[] = []
 
 export const entranceEffects = ['pop', 'slide', 'spiral', 'bounce', 'fade']
 
@@ -45,66 +46,48 @@ export const getRandomColor = () => {
 }
 
 export const getShapePosition = (): [number, number, number] => {
-  const predefinedPositions: [number, number, number][] = [
-    // Far left positions
+  const desktopPositions: [number, number, number][] = [
+    // Original wide positions for desktop
     [-6.0, 3.5, -1.0],
     [-5.8, 1.8, -0.5],
     [-5.5, -1.5, 0],
     [-5.2, -3.0, -1.0],
-
-    // Left positions
     [-4.2, 4.0, 0.5],
     [-3.8, 2.5, 0],
     [-3.5, 0.8, 0.8],
     [-3.7, -2.2, -0.2],
     [-4.0, -3.5, -0.8],
-
-    // Left-center positions
     [-2.6, 3.3, 0.2],
     [-2.3, 1.4, -0.7],
     [-2.5, -0.8, 0.4],
     [-2.0, -2.8, -0.1],
-
-    // Center-left positions (spaced out from center)
     [-1.5, 3.0, 1.0],
     [-1.3, 1.0, -0.3],
     [-1.2, -1.0, 0.6],
     [-1.4, -3.0, -0.6],
-
-    // Center-right positions (spaced out from center)
     [1.5, 3.0, 1.0],
     [1.3, 1.0, -0.3],
     [1.2, -1.0, 0.6],
     [1.4, -3.0, -0.6],
-
-    // Right-center positions
     [2.6, 3.3, 0.2],
     [2.3, 1.4, -0.7],
     [2.5, -0.8, 0.4],
     [2.0, -2.8, -0.1],
-
-    // Right positions
     [4.2, 4.0, 0.5],
     [3.8, 2.5, 0],
     [3.5, 0.8, 0.8],
     [3.7, -2.2, -0.2],
     [4.0, -3.5, -0.8],
-
-    // Far right positions
     [6.0, 3.5, -1.0],
     [5.8, 1.8, -0.5],
     [5.5, -1.5, 0],
     [5.2, -3.0, -1.0],
-
-    // Extreme positions for more diversity
     [7.0, 2.0, -0.5],
     [6.5, -2.0, 0],
     [-7.0, 2.0, -0.5],
     [-6.5, -2.0, 0],
     [0, 6.0, -1.0],
     [0, -6.0, -1.0],
-
-    // Foreground positions (closer to camera)
     [2.0, 1.0, 0.5],
     [-2.0, -1.0, 0.5],
     [1.2, -1.2, 0.7],
@@ -115,16 +98,86 @@ export const getShapePosition = (): [number, number, number] => {
     [0, -2.5, 0.4],
   ]
 
-  const availableIndices = Array.from(
-    { length: predefinedPositions.length },
-    (_, i) => i
-  ).filter((index) => !usedPositionIndices.includes(index))
+  const mobilePositions: [number, number, number][] = [
+    [-3.0, 4.5, -1.0],
+    [-2.8, 2.5, -0.5],
+    [-2.5, -2.0, 0],
+    [-2.2, -4.0, -1.0],
+    [-2.2, 5.0, 0.5],
+    [-1.8, 3.5, 0],
+    [-1.5, 1.2, 0.8],
+    [-1.7, -3.0, -0.2],
+    [-2.0, -4.5, -0.8],
+    [-1.6, 4.0, 0.2],
+    [-1.3, 2.0, -0.7],
+    [-1.5, -1.2, 0.4],
+    [-1.0, -3.8, -0.1],
+    [-0.8, 3.8, 1.0],
+    [-0.6, 1.5, -0.3],
+    [-0.5, -1.5, 0.6],
+    [-0.7, -4.0, -0.6],
+    [0.8, 3.8, 1.0],
+    [0.6, 1.5, -0.3],
+    [0.5, -1.5, 0.6],
+    [0.7, -4.0, -0.6],
+    [1.6, 4.0, 0.2],
+    [1.3, 2.0, -0.7],
+    [1.5, -1.2, 0.4],
+    [1.0, -3.8, -0.1],
+    [2.2, 5.0, 0.5],
+    [1.8, 3.5, 0],
+    [1.5, 1.2, 0.8],
+    [1.7, -3.0, -0.2],
+    [2.0, -4.5, -0.8],
+    [3.0, 4.5, -1.0],
+    [2.8, 2.5, -0.5],
+    [2.5, -2.0, 0],
+    [2.2, -4.0, -1.0],
+    [3.5, 3.0, -0.5],
+    [3.0, -3.0, 0],
+    [-3.5, 3.0, -0.5],
+    [-3.0, -3.0, 0],
+    [0, 7.0, -1.0],
+    [0, -7.0, -1.0],
+    [1.0, 1.5, 0.5],
+    [-1.0, -1.5, 0.5],
+    [0.7, -1.8, 0.7],
+    [-0.7, 1.8, 0.7],
+    [1.5, 0.0, 0.2],
+    [-1.5, 0.0, 0.2],
+    [0, 3.5, 0.4],
+    [0, -3.5, 0.4],
+  ]
 
-  // If all positions are used, reset the tracking
+  let positionsToUse: [number, number, number][]
+  let usedIndices: number[]
+
+  // Check if running in a browser environment and screen width
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+
+  if (isMobile) {
+    positionsToUse = mobilePositions
+    usedIndices = usedMobileIndices
+  } else {
+    positionsToUse = desktopPositions
+    usedIndices = usedDesktopIndices
+  }
+
+  const availableIndices = Array.from(
+    { length: positionsToUse.length },
+    (_, i) => i
+  ).filter((index) => !usedIndices.includes(index))
+
+  // If all positions are used for the current mode, reset the tracking for that mode
   if (availableIndices.length === 0) {
-    usedPositionIndices = []
+    if (isMobile) {
+      usedMobileIndices = []
+    } else {
+      usedDesktopIndices = []
+    }
+    // Refill availableIndices after reset
     availableIndices.push(
-      ...Array.from({ length: predefinedPositions.length }, (_, i) => i)
+      ...Array.from({ length: positionsToUse.length }, (_, i) => i)
     )
   }
 
@@ -132,10 +185,14 @@ export const getShapePosition = (): [number, number, number] => {
   const randomIndex = Math.floor(Math.random() * availableIndices.length)
   const selectedIndex = availableIndices[randomIndex]
 
-  // Mark this position as used
-  usedPositionIndices.push(selectedIndex)
+  // Mark this position as used for the current mode
+  if (isMobile) {
+    usedMobileIndices.push(selectedIndex)
+  } else {
+    usedDesktopIndices.push(selectedIndex)
+  }
 
-  return predefinedPositions[selectedIndex]
+  return positionsToUse[selectedIndex]
 }
 
 // Helper function to randomly select a material type

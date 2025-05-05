@@ -49,14 +49,7 @@ const AnimatedSphere = ({
 
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
-      <Sphere
-        args={[1.4, 128, 128]}
-        ref={meshRef}
-        scale={
-          // Scale down only on smaller screens
-          typeof window !== 'undefined' && window.innerWidth < 768 ? 0.85 : 1
-        }
-      >
+      <Sphere args={[1.4, 128, 128]} ref={meshRef}>
         <MeshDistortMaterial
           color={color}
           attach='material'
@@ -418,7 +411,7 @@ export default function HeroSection() {
         {/* Background Canvas for Custom Shapes */}
         {playgroundSettings.customShapes.enabled && (
           <div className='absolute inset-0 z-5 pointer-events-none'>
-            <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
+            <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
               <ambientLight intensity={0.6} />
               <directionalLight position={[10, 10, 5]} intensity={1.5} />
               <spotLight
@@ -612,7 +605,7 @@ export default function HeroSection() {
 
           {/* 3D Element Container */}
           <motion.div
-            className='h-[300px] sm:h-[350px] md:h-[450px] lg:h-[550px] w-full lg:w-1/2 relative'
+            className='h-[400px] sm:h-[450px] md:h-[450px] lg:h-[550px] w-full lg:w-1/2 relative'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 1 }}
