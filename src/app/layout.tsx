@@ -3,6 +3,7 @@ import { Inter, Roboto_Mono, Poppins } from 'next/font/google'
 import './globals.css'
 import Providers from './providers'
 import AppErrorBoundary from '@/components/ErrorBoundary'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -79,6 +80,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${robotoMono.variable} ${poppins.variable} font-sans antialiased bg-gradient-to-br from-base-100 to-base-200 min-h-screen`}
       >
+        <SpeedInsights />
         <AppErrorBoundary>
           <Providers>{children}</Providers>
         </AppErrorBoundary>
