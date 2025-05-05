@@ -17,7 +17,10 @@ import {
   SiNodedotjs,
   SiTailwindcss,
 } from 'react-icons/si'
-import CustomShapes, { ShapesProvider } from '../ui/CustomShapes'
+import CustomShapes, {
+  ShapesProvider,
+  ShapesControls,
+} from '../ui/CustomShapes'
 
 type AnimatedSphereProps = {
   color: string
@@ -37,16 +40,10 @@ const AnimatedSphere = ({
   metalness = 0.9,
 }: AnimatedSphereProps) => {
   const meshRef = useRef<THREE.Mesh>(null)
-  const [hovered, setHovered] = useState(false)
 
   useFrame(() => {
     if (meshRef.current) {
       meshRef.current.rotation.x = meshRef.current.rotation.y += 0.01 * speed
-      // Add subtle pulse effect when hovered
-      meshRef.current.scale.x =
-        meshRef.current.scale.y =
-        meshRef.current.scale.z =
-          1 + (hovered ? Math.sin(Date.now() * 0.005) * 0.1 : 0)
     }
   })
 
@@ -55,8 +52,6 @@ const AnimatedSphere = ({
       <Sphere
         args={[1.4, 128, 128]}
         ref={meshRef}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
         scale={
           // Scale down only on smaller screens
           typeof window !== 'undefined' && window.innerWidth < 768 ? 0.85 : 1
@@ -65,12 +60,12 @@ const AnimatedSphere = ({
         <MeshDistortMaterial
           color={color}
           attach='material'
-          distort={hovered ? distort + 0.1 : distort}
+          distort={distort}
           speed={speed}
           roughness={roughness}
           metalness={metalness}
           emissive={emissive}
-          emissiveIntensity={hovered ? 0.7 : 0.5}
+          emissiveIntensity={0.5}
         />
       </Sphere>
     </Float>
@@ -214,6 +209,7 @@ const MemoizedFloatingObjects = memo(FloatingObjects)
 const MemoizedMouseLight = memo(MouseLight)
 const MemoizedPlaygroundControls = memo(PlaygroundControls)
 const MemoizedCustomShapes = memo(CustomShapes)
+const MemoizedShapesControls = memo(ShapesControls)
 
 export default function HeroSection() {
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
@@ -437,7 +433,6 @@ export default function HeroSection() {
                   playgroundSettings.customShapes.speed *
                   playgroundSettings.animation.speed
                 }
-                shapesOnly={true}
               />
             </Canvas>
           </div>
@@ -617,9 +612,7 @@ export default function HeroSection() {
 
           {/* 3D Element Container */}
           <motion.div
-            className={`h-[300px] sm:h-[350px] md:h-[450px] lg:h-[550px] w-full lg:w-1/2 relative ${
-              playgroundMode ? 'lg:w-3/4 lg:pr-4' : ''
-            }`}
+            className='h-[300px] sm:h-[350px] md:h-[450px] lg:h-[550px] w-full lg:w-1/2 relative'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 1 }}
@@ -673,24 +666,8 @@ export default function HeroSection() {
                 />
               </Canvas>
 
-              {/* Controls for CustomShapes */}
-              {playgroundSettings.customShapes.enabled && (
-                <div className='absolute inset-0 z-[450]'>
-                  <MemoizedCustomShapes
-                    enabled={true}
-                    speed={
-                      playgroundSettings.customShapes.speed *
-                      playgroundSettings.animation.speed
-                    }
-                    uiOnly={true}
-                    onSettingsClick={handleSettingsClickForCustomShapes}
-                  />
-                </div>
-              )}
-
-              {/* Enhanced decorative elements - add subtle animation with cursor */}
               <div
-                className='absolute -top-10 right-10 sm:right-20 w-32 sm:w-40 h-32 sm:h-40 bg-secondary/20 rounded-full blur-3xl animate-pulse-slow'
+                className='absolute -top-10 right-20 sm:right-15 w-32 sm:w-40 h-32 sm:h-40 bg-secondary/20 rounded-full blur-3xl animate-pulse-slow'
                 style={{
                   transform: `translate(${cursorPos.x * 5}px, ${
                     -cursorPos.y * 5
@@ -698,6 +675,10 @@ export default function HeroSection() {
                   transition: 'transform 0.3s ease-out',
                 }}
               ></div>
+              <MemoizedShapesControls
+                onClickSettings={handleSettingsClickForCustomShapes}
+              />
+
               <div
                 className='absolute -bottom-10 sm:-bottom-20 left-10 sm:left-20 w-40 sm:w-60 h-40 sm:h-60 bg-primary/20 rounded-full blur-3xl animate-pulse-slow animation-delay-2000'
                 style={{
@@ -973,41 +954,6 @@ export default function HeroSection() {
           />
         )}
       </section>
-
-      {/* Custom Shapes Control */}
-      {!showControlPanel && playgroundMode && (
-        <div className='absolute inset-0 z-5 pointer-events-none'>
-          <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[10, 10, 5]} intensity={1.5} />
-            <spotLight
-              position={[-10, -10, -5]}
-              intensity={1}
-              angle={0.4}
-              penumbra={1}
-            />
-            <MemoizedCustomShapes
-              enabled={playgroundSettings.customShapes.enabled}
-              speed={
-                playgroundSettings.customShapes.speed *
-                playgroundSettings.animation.speed
-              }
-              shapesOnly={true}
-            />
-          </Canvas>
-        </div>
-      )}
-
-      {/* UI Controls for Custom Shapes */}
-      {!showControlPanel &&
-        playgroundMode &&
-        playgroundSettings.customShapes.enabled && (
-          <MemoizedCustomShapes
-            enabled={true}
-            uiOnly={true}
-            onSettingsClick={handleSettingsClickForCustomShapes}
-          />
-        )}
     </ShapesProvider>
   )
 }
