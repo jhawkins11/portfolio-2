@@ -129,8 +129,15 @@ export const calculateNormalizationParams = (pts: Point[]) => {
 
   const centerX = (minX + maxX) / 2
   const centerY = (minY + maxY) / 2
-  // Avoid division by zero if shape has no area
-  const size = Math.max(maxX - minX, maxY - minY, 1) / 2
+
+  // Get maximum dimension of the shape
+  const width = maxX - minX
+  const height = maxY - minY
+  const maxDim = Math.max(width, height)
+
+  // Ensure we always normalize to [-1, 1] range, regardless of how small the shape is
+  // Division by 2 because we want points to range from -1 to 1 (range of 2)
+  const size = maxDim > 0 ? maxDim / 2 : 0.5
 
   return { centerX, centerY, size }
 }
