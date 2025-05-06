@@ -803,7 +803,7 @@ export default function HeroSection() {
               {/* Simplified code display */}
               <pre className='text-[9px] sm:text-[10px] font-mono leading-tight overflow-hidden px-5 sm:px-6 py-3 sm:py-4'>
                 <code className='text-gray-300 block'>
-                  {`// 4+ years exp`} <br />
+                  {`// 3+ years exp`} <br />
                   <span className='text-[#8be9fd]'>function</span>{' '}
                   <span className='text-[#f1fa8c]'>createImpact</span>( <br />
                   {'  '}
