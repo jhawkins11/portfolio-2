@@ -43,18 +43,58 @@ export async function GET() {
       )
     }
 
-    const data = (await response.json()) as GitHubEvent[]
-    const relevantEvents: GitHubEventResponse[] = data.map(
-      (event: GitHubEvent) => ({
-        id: event.id,
-        type: event.type,
-        repo: event.repo.name,
-        createdAt: event.created_at,
-        payload: event.payload,
-      })
-    )
+    const data = (await response.json()) as unknown
 
-    return NextResponse.json(relevantEvents)
+    // Validate data is an array
+    if (!Array.isArray(data)) {
+      throw new Error('GitHub API response is not an array')
+    }
+
+    try {
+      const relevantEvents: GitHubEventResponse[] = data.map(
+        (event: unknown) => {
+          // Type validation for event fields
+          if (
+            !event ||
+            typeof event !== 'object' ||
+            !('id' in event) ||
+            !('type' in event) ||
+            !('repo' in event) ||
+            !('created_at' in event) ||
+            !('payload' in event) ||
+            typeof event.id !== 'string' ||
+            typeof event.type !== 'string' ||
+            !event.repo ||
+            typeof event.repo !== 'object' ||
+            !('name' in event.repo) ||
+            typeof event.repo.name !== 'string' ||
+            typeof event.created_at !== 'string'
+          ) {
+            throw new Error(
+              'Malformed GitHub event data: ' + JSON.stringify(event)
+            )
+          }
+
+          const typedEvent = event as GitHubEvent
+
+          return {
+            id: typedEvent.id,
+            type: typedEvent.type,
+            repo: typedEvent.repo.name,
+            createdAt: typedEvent.created_at,
+            payload: typedEvent.payload,
+          }
+        }
+      )
+
+      return NextResponse.json(relevantEvents)
+    } catch (validationError) {
+      console.error('Error processing GitHub event data:', validationError)
+      return NextResponse.json(
+        { error: 'Error processing GitHub API data' },
+        { status: 500 }
+      )
+    }
   } catch (error) {
     console.error('Error fetching GitHub activity:', error)
     const message =
