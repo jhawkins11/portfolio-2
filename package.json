@@ -16,6 +16,7 @@
     "@react-three/fiber": "^9.1.2",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query-devtools": "^5.72.2",
+    "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "daisyui": "^5.0.0",
     "framer-motion": "^12.4.10",

@@ -4,6 +4,7 @@ import './globals.css'
 import Providers from './providers'
 import AppErrorBoundary from '@/components/ErrorBoundary'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/react'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -84,6 +85,7 @@ export default function RootLayout({
         <AppErrorBoundary>
           <Providers>{children}</Providers>
         </AppErrorBoundary>
+        <Analytics />
       </body>
     </html>
   )
