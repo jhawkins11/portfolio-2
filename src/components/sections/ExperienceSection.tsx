@@ -14,6 +14,39 @@ import { SectionTitle } from '../ui/SectionTitle'
 
 const experiences = [
   {
+    title: 'Freelance AWS Consultant',
+    company: 'AWS IQ Platform',
+    location: 'Remote',
+    period: '05/2025 – Present',
+    link: 'https://iq.aws.amazon.com/e/josiahhawkins',
+    metrics: [
+      { icon: FiAward, value: '5★', label: 'Client Rating' },
+      { icon: FiTrendingUp, value: '100%', label: 'Success Rate' },
+      { icon: FiCode, value: '3', label: 'Critical Issues Resolved' },
+    ],
+    description: [
+      {
+        highlight: 'Infrastructure Crisis Resolution',
+        text: 'Resolved critical infrastructure blockers for a code executor platform, including Terraform state drift, VPC misconfigurations, and ECS container deployment failures that were preventing core functionality.',
+        impact: 'Restored platform functionality',
+        highlightPhrase: 'critical infrastructure blockers',
+      },
+      {
+        highlight: 'Multi-Service AWS Troubleshooting',
+        text: 'Diagnosed and remediated complex issues across Terraform state management, VPC network architecture, and ECS container orchestration, demonstrating deep expertise in AWS infrastructure services.',
+        impact: 'Comprehensive infrastructure stabilization',
+        highlightPhrase: 'Multi-Service AWS Troubleshooting',
+      },
+      {
+        highlight: 'Client Testimonial',
+        text: '"Highly recommended for anyone facing complex AWS challenges! Excellent communication, strong get \'er done attitude." - AWS IQ Client Review, May 2025',
+        impact: '5-star client satisfaction',
+        highlightPhrase:
+          'Highly recommended for anyone facing complex AWS challenges',
+      },
+    ],
+  },
+  {
     title: 'Full Stack Developer',
     company: 'DLD-VIP',
     location: 'Peoria Heights, IL',
@@ -254,9 +287,34 @@ export default function ExperienceSection() {
                       <FiBriefcase className='text-primary w-5 h-5' />
                     </div>
                     <div>
-                      <p className='text-lg font-medium text-primary/90'>
-                        {experience.company}
-                      </p>
+                      <div className='flex items-center gap-2'>
+                        <p className='text-lg font-medium text-primary/90'>
+                          {experience.company}
+                        </p>
+                        {experience.link && (
+                          <a
+                            href={experience.link}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors duration-200'
+                          >
+                            View Profile
+                            <svg
+                              className='w-3 h-3'
+                              fill='none'
+                              stroke='currentColor'
+                              viewBox='0 0 24 24'
+                            >
+                              <path
+                                strokeLinecap='round'
+                                strokeLinejoin='round'
+                                strokeWidth={2}
+                                d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14'
+                              />
+                            </svg>
+                          </a>
+                        )}
+                      </div>
                       <div className='flex items-center text-sm text-muted-foreground/90'>
                         <FiMapPin className='mr-1.5 w-3.5 h-3.5' />
                         {experience.location}
