@@ -43,7 +43,7 @@ const projects: Project[] = [
     id: 'doc-genie',
     title: 'Doc Genie',
     description:
-      'An AI-powered document tree builder that enables collaborative authoring and leverages OpenAI GPT-4 for automated drafting and revisions.',
+      'An AI-powered document editor designed to accelerate content creation. Features dynamic AI model-switching (via OpenRouter), intelligent rate-limiting, and a hierarchical tree-based interface.',
     images: [
       'https://github.com/jhawkins11/doc-genie/raw/main/public/screenshot-1.png',
       'https://github.com/jhawkins11/doc-genie/raw/main/public/screenshot-2.png',
@@ -62,20 +62,20 @@ const projects: Project[] = [
     },
     highlights: [
       {
-        text: 'One-click content expansion with AI assistance',
+        text: 'Dynamic AI model-switching with OpenRouter',
         icon: SiOpenai,
       },
       {
-        text: 'Co-authoring with real-time collaboration',
+        text: 'API rate-limiting to manage costs & users',
         icon: SiReact,
       },
       {
-        text: 'Secure authentication with Firebase Auth',
+        text: 'Hierarchical document organization in a tree-like UI',
         icon: SiNextdotjs,
       },
     ],
     longDescription:
-      'Doc Genie is an innovative document management system that leverages AI to help teams collaborate on complex document structures. The application addresses the challenge of maintaining large, hierarchical documentation by providing an intuitive visual interface and powerful AI assistance. Users can quickly expand document sections with one-click AI-powered content generation, while maintaining full editorial control over the final output.',
+      'Doc Genie is an innovative document editor that leverages AI to accelerate the writing process. The application addresses the challenge of drafting high-quality content efficiently by providing an intuitive, tree-based interface and powerful, flexible AI assistance. Users can instantly generate content with AI, but more importantly, they can choose the best model for the job—balancing speed, cost, and power through an OpenRouter integration. The application is built for public use, featuring a robust rate-limiting system to manage API costs and ensure a stable experience for all users.',
     techStackDetails: [
       {
         name: 'React',
@@ -99,9 +99,10 @@ const projects: Project[] = [
         description: 'Document database for flexible schema design',
       },
       {
-        name: 'OpenAI',
+        name: 'OpenRouter',
         icon: SiOpenai,
-        description: 'AI integration for content generation using GPT-4',
+        description:
+          'AI integration for content generation with multiple models',
       },
       {
         name: 'Firebase',
@@ -125,22 +126,22 @@ const projects: Project[] = [
       },
     ],
     challenges: [
-      'Creating an intuitive UI for complex document hierarchies',
-      'Ensuring reliable AI-generated content while maintaining user control',
-      'Implementing real-time collaboration without conflicts',
-      'Designing a flexible document tree structure that can accommodate various content types',
+      'Managing API costs and preventing abuse of expensive AI models from unauthenticated users',
+      'Providing users flexibility to choose between different AI models for various use cases',
+      'Creating an intuitive interface for managing complex document hierarchies',
+      'Designing a scalable document structure for diverse content types',
     ],
     solutions: [
-      'Developed a drag-and-drop interface with visual node connections',
-      'Implemented a review and edit system for AI suggestions',
-      'Used optimistic UI updates with conflict resolution',
-      'Created a modular document schema in MongoDB for maximum flexibility',
+      'Built a sophisticated rate-limiting system with tiered access levels for guests vs authenticated users',
+      'Integrated OpenRouter API to enable dynamic switching between multiple AI models',
+      'Developed a clean tree-based UI for hierarchical document organization',
+      'Implemented a flexible MongoDB schema to accommodate various document structures',
     ],
     outcomes: [
-      'Streamlined documentation process',
-      'Enhanced content quality through AI assistance',
-      'Improved team collaboration efficiency',
+      'Increased user engagement with one-click document generation',
       'Significant reduction in document creation time',
+      'Enhanced content quality through AI assistance',
+      'Streamlined documentation process',
     ],
   },
   {

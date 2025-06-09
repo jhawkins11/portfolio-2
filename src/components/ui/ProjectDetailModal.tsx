@@ -263,45 +263,47 @@ export default function ProjectDetailModal({
 
           {project.challenges && project.solutions && (
             <motion.div
-              className='grid grid-cols-1 md:grid-cols-2 gap-8 mb-8'
+              className='mb-8'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.3 }}
             >
-              <div>
-                <h3 className='text-xl font-semibold mb-4 text-foreground'>
-                  Challenges
-                </h3>
-                <ul className='space-y-2 list-disc list-inside text-muted-foreground'>
-                  {project.challenges.map((challenge, i) => (
-                    <motion.li
-                      key={i}
-                      initial={{ opacity: 0, x: -5 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.7 + i * 0.05, duration: 0.2 }}
-                    >
-                      {challenge}
-                    </motion.li>
-                  ))}
-                </ul>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+                <div>
+                  <h3 className='text-xl font-semibold mb-4 text-foreground'>
+                    Challenges
+                  </h3>
+                </div>
+                <div>
+                  <h3 className='text-xl font-semibold mb-4 text-foreground'>
+                    Solutions
+                  </h3>
+                </div>
               </div>
 
-              <div>
-                <h3 className='text-xl font-semibold mb-4 text-foreground'>
-                  Solutions
-                </h3>
-                <ul className='space-y-2 list-disc list-inside text-muted-foreground'>
-                  {project.solutions.map((solution, i) => (
-                    <motion.li
-                      key={i}
-                      initial={{ opacity: 0, x: -5 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.8 + i * 0.05, duration: 0.2 }}
-                    >
-                      {solution}
-                    </motion.li>
-                  ))}
-                </ul>
+              <div className='space-y-6'>
+                {project.challenges.map((challenge, i) => (
+                  <motion.div
+                    key={i}
+                    className='grid grid-cols-1 md:grid-cols-2 gap-8 items-start'
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 + i * 0.1, duration: 0.3 }}
+                  >
+                    <div className='flex items-start gap-3'>
+                      <span className='text-primary mt-1 flex-shrink-0'>•</span>
+                      <span className='text-muted-foreground leading-relaxed'>
+                        {challenge}
+                      </span>
+                    </div>
+                    <div className='flex items-start gap-3'>
+                      <span className='text-primary mt-1 flex-shrink-0'>•</span>
+                      <span className='text-muted-foreground leading-relaxed'>
+                        {project.solutions?.[i] || ''}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </motion.div>
           )}
